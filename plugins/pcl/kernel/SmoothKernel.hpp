@@ -35,9 +35,8 @@
 
 #pragma once
 
-#include <pdal/util/FileUtils.hpp>
-
 #include <pdal/Kernel.hpp>
+#include <pdal/pdal_export.hpp>
 
 namespace pdal
 {
@@ -48,17 +47,14 @@ public:
     SET_KERNEL_NAME("smooth", "Smooth Kernel")
     SET_KERNEL_LINK("http://pdal.io/kernels/kernels.smooth.html")
 
-    SmoothKernel() {};
+    SmoothKernel()
+    {};
     int execute();
 
 private:
     void addSwitches();
     void validateSwitches();
-
-    std::unique_ptr<Stage> makeReader(Options readerOptions);
-
-    std::string m_inputFile;
-    std::string m_outputFile;
 };
 
-} // pdal
+} // namespace pdal
+

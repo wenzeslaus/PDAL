@@ -33,33 +33,59 @@
  ****************************************************************************/
 
 #include "PCLKernel.hpp"
-#include "../filters/PCLBlock.hpp"
-#include <pdal/KernelFactory.hpp>
 
 #include <pdal/BufferReader.hpp>
+#include <pdal/KernelFactory.hpp>
+
+#include "PCLBlock.hpp"
+
+#include <string>
+#include <vector>
 
 CREATE_KERNEL_PLUGIN(pcl, pdal::PCLKernel)
 
 namespace pdal
 {
 
-PCLKernel::PCLKernel()
-    : Kernel()
-    , m_bCompress(false)
-    , m_bForwardMetadata(false)
+namespace
 {
+
+static std::unique_ptr<Stage> makeReader(Options options, std::string filename, uint32_t verbosity, bool debug=true)
+{
+    if (debug)
+    {
+        options.add<bool>("debug", true);
+        if (!verbosity)
+            verbosity = 1;
+
+        options.add<uint32_t>("verbose", verbosity);
+        options.add<std::string>("log", "STDERR");
+    }
+
+    Stage* stage = KernelSupport::makeReader(filename);
+    stage->setOptions(options);
+    std::unique_ptr<Stage> reader_stage(stage);
+
+    return reader_stage;
+}
+
+static std::string s_inputFile;
+static std::string s_outputFile;
+static std::string s_pclFile;
+static bool s_bCompress = false;
+static bool s_bForwardMetadata = false;
+
 }
 
 void PCLKernel::validateSwitches()
 {
-    if (m_inputFile == "")
+    if (s_inputFile == "")
         throw app_usage_error("--input/-i required");
-    if (m_outputFile == "")
+    if (s_outputFile == "")
         throw app_usage_error("--output/-o required");
-    if (m_pclFile == "")
+    if (s_pclFile == "")
         throw app_usage_error("--pcl/-p required");
 }
-
 
 void PCLKernel::addSwitches()
 {
@@ -67,18 +93,18 @@ void PCLKernel::addSwitches()
         new po::options_description("file options");
 
     file_options->add_options()
-    ("input,i", po::value<std::string>(&m_inputFile)->default_value(""),
+    ("input,i", po::value<std::string>(&s_inputFile)->default_value(""),
      "input file name")
-    ("output,o", po::value<std::string>(&m_outputFile)->default_value(""),
+    ("output,o", po::value<std::string>(&s_outputFile)->default_value(""),
      "output file name")
-    ("pcl,p", po::value<std::string>(&m_pclFile)->default_value(""),
+    ("pcl,p", po::value<std::string>(&s_pclFile)->default_value(""),
      "pcl file name")
     ("compress,z",
-        po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(true),
-        "Compress output data (if supported by output format)")
+     po::value<bool>(&s_bCompress)->zero_tokens()->implicit_value(true),
+     "Compress output data (if supported by output format)")
     ("metadata,m",
-        po::value< bool >(&m_bForwardMetadata)->implicit_value(true),
-        "Forward metadata (VLRs, header entries, etc) from previous stages")
+     po::value< bool >(&s_bForwardMetadata)->implicit_value(true),
+     "Forward metadata (VLRs, header entries, etc) from previous stages")
     ;
 
     addSwitchSet(file_options);
@@ -88,37 +114,16 @@ void PCLKernel::addSwitches()
     addPositionalSwitch("pcl", 1);
 }
 
-std::unique_ptr<Stage> PCLKernel::makeReader(Options readerOptions)
-{
-    if (isDebug())
-    {
-        readerOptions.add<bool>("debug", true);
-        uint32_t verbosity(getVerboseLevel());
-        if (!verbosity)
-            verbosity = 1;
-
-        readerOptions.add<uint32_t>("verbose", verbosity);
-        readerOptions.add<std::string>("log", "STDERR");
-    }
-
-    Stage* stage = KernelSupport::makeReader(m_inputFile);
-    stage->setOptions(readerOptions);
-    std::unique_ptr<Stage> reader_stage(stage);
-
-    return reader_stage;
-}
-
-
 int PCLKernel::execute()
 {
     PointContext ctx;
 
     Options readerOptions;
-    readerOptions.add<std::string>("filename", m_inputFile);
+    readerOptions.add<std::string>("filename", s_inputFile);
     readerOptions.add<bool>("debug", isDebug());
     readerOptions.add<uint32_t>("verbose", getVerboseLevel());
 
-    std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
+    std::unique_ptr<Stage> readerStage = makeReader(readerOptions, s_inputFile, getVerboseLevel(), isDebug());
 
     // go ahead and prepare/execute on reader stage only to grab input
     // PointBufferSet, this makes the input PointBuffer available to both the
@@ -133,11 +138,11 @@ int PCLKernel::execute()
     bufferReader.addBuffer(input_buffer);
 
     Options pclOptions;
-    pclOptions.add<std::string>("filename", m_pclFile);
+    pclOptions.add<std::string>("filename", s_pclFile);
     pclOptions.add<bool>("debug", isDebug());
     pclOptions.add<uint32_t>("verbose", getVerboseLevel());
 
-    std::unique_ptr<Stage> pclStage(new filters::PCLBlock());
+    std::unique_ptr<Stage> pclStage(new PCLBlock());
     pclStage->setInput(&bufferReader);
     pclStage->setOptions(pclOptions);
 
@@ -145,12 +150,12 @@ int PCLKernel::execute()
     // readerStage
 
     Options writerOptions;
-    writerOptions.add<std::string>("filename", m_outputFile);
+    writerOptions.add<std::string>("filename", s_outputFile);
     setCommonOptions(writerOptions);
 
-    if (m_bCompress)
+    if (s_bCompress)
         writerOptions.add<bool>("compression", true);
-    if (m_bForwardMetadata)
+    if (s_bForwardMetadata)
         writerOptions.add("forward_metadata", true);
 
     std::vector<std::string> cmd = getProgressShellCommand();
@@ -158,8 +163,8 @@ int PCLKernel::execute()
         cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
         (UserCallback *)new HeartbeatCallback();
 
-    WriterPtr
-        writer(KernelSupport::makeWriter(m_outputFile, pclStage.get()));
+    std::unique_ptr<Writer>
+    writer(KernelSupport::makeWriter(s_outputFile, pclStage.get()));
 
     // Some options are inferred by makeWriter based on filename
     // (compression, driver type, etc).

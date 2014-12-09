@@ -34,8 +34,10 @@
 
 #pragma once
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/Dimension.hpp>
+#include <pdal/pdal_export.hpp>
 #include <pdal/Reader.hpp>
+#include <pdal/Stage.hpp>
 #include <pdal/StageFactory.hpp>
 
 #include "PcdCommon.hpp"
@@ -43,14 +45,20 @@
 namespace pdal
 {
 
-class PDAL_DLL PcdReader : public pdal::Reader
+class PointBuffer;
+class PointContext;
+
+typedef PointContext PointContextRef;
+
+class PDAL_DLL PcdReader : public Reader
 {
 public:
     SET_STAGE_NAME("readers.pcd", "Read data from Point Cloud Library (PCL).")
     SET_STAGE_LINK("http://pdal.io/stages/readers.pcd.html")
     SET_PLUGIN_VERSION("1.0.0b1")
 
-    PcdReader() : Reader() {};
+    PcdReader()
+    {};
 
     static Dimension::IdList getDefaultDimensions()
     {
@@ -66,3 +74,4 @@ private:
 };
 
 } // namespace pdal
+

@@ -33,15 +33,17 @@
 ****************************************************************************/
 
 #include "PcdReader.hpp"
-#include "point_types.hpp"
-
-#include <boost/algorithm/string.hpp>
 
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/impl/pcd_io.hpp>
 
+#include <pdal/pdal_macros.hpp>
+#include <pdal/pdal_types.hpp>
 #include <pdal/PointBuffer.hpp>
+#include <pdal/PointContext.hpp>
+
 #include "PCLConversions.hpp"
+#include "point_types.hpp"
 
 CREATE_READER_PLUGIN(pcd, pdal::PcdReader)
 
@@ -76,3 +78,4 @@ point_count_t PcdReader::read(PointBuffer& data, point_count_t count)
 }
 
 } // namespace pdal
+

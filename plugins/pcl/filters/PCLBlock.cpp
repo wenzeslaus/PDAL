@@ -32,28 +32,33 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "../PCLConversions.hpp"
 #include "PCLBlock.hpp"
+#include "PCLConversions.hpp"
+#include "PCLPipeline.h"
 
 #include <pcl/console/print.h>
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
 
-#include "../pipeline/PCLPipeline.h"
+#include <string>
 
-CREATE_FILTER_PLUGIN(pclblock, pdal::filters::PCLBlock)
+CREATE_FILTER_PLUGIN(pclblock, pdal::PCLBlock)
 
 namespace pdal
 {
-namespace filters
+
+namespace
 {
+static std::string s_filename;
+static std::string s_json;
+}
 
 /** \brief This method processes the PointBuffer through the given pipeline. */
 
 void PCLBlock::processOptions(const Options& options)
 {
-    m_filename = options.getValueOrDefault<std::string>("filename", "");
-    m_json = options.getValueOrDefault<std::string>("json", "");
+    s_filename = options.getValueOrDefault<std::string>("filename", "");
+    s_json = options.getValueOrDefault<std::string>("json", "");
 }
 
 
@@ -113,10 +118,10 @@ PointBufferSet PCLBlock::run(PointBufferPtr input)
 
     pcl::Pipeline<pcl::PointXYZ> pipeline;
     pipeline.setInputCloud(cloud);
-    if (!m_filename.empty())
-        pipeline.setFilename(m_filename);
-    else if (!m_json.empty())
-        pipeline.setJSON(m_json);
+    if (!s_filename.empty())
+        pipeline.setFilename(s_filename);
+    else if (!s_json.empty())
+        pipeline.setJSON(s_json);
     else
         throw pdal_error("No PCL pipeline specified!");
     // PDALtoPCD subtracts min values in each XYZ dimension to prevent rounding
@@ -145,5 +150,4 @@ PointBufferSet PCLBlock::run(PointBufferPtr input)
     return pbSet;
 }
 
-} // filters
 } // pdal

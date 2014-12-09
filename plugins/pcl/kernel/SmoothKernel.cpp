@@ -34,41 +34,69 @@
 ****************************************************************************/
 
 #include "SmoothKernel.hpp"
-#include "../filters/PCLBlock.hpp"
-#include <pdal/KernelFactory.hpp>
 
 #include <pdal/BufferReader.hpp>
+#include <pdal/KernelFactory.hpp>
+
+#include "PCLBlock.hpp"
+
+#include <map>
+#include <string>
+#include <vector>
 
 CREATE_KERNEL_PLUGIN(smooth, pdal::SmoothKernel)
 
 namespace pdal
 {
 
+namespace
+{
+
+static std::unique_ptr<Stage> makeReader(Options options, std::string filename, uint32_t verbosity, bool debug=true)
+{
+    if (debug)
+    {
+        options.add<bool>("debug", true);
+        if (!verbosity)
+            verbosity = 1;
+
+        options.add<uint32_t>("verbose", verbosity);
+        options.add<std::string>("log", "STDERR");
+    }
+
+    Stage* stage = KernelSupport::makeReader(filename);
+    stage->setOptions(options);
+    std::unique_ptr<Stage> reader_stage(stage);
+
+    return reader_stage;
+}
+
+static std::string s_inputFile;
+static std::string s_outputFile;
+
+}
+
 
 void SmoothKernel::validateSwitches()
 {
-    if (m_inputFile == "")
+    if (s_inputFile == "")
     {
         throw app_usage_error("--input/-i required");
     }
 
-    if (m_outputFile == "")
+    if (s_outputFile == "")
     {
         throw app_usage_error("--output/-o required");
     }
-
-    return;
 }
-
 
 void SmoothKernel::addSwitches()
 {
     po::options_description* file_options = new po::options_description("file options");
 
     file_options->add_options()
-    ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
-    ("output,o", po::value<std::string>(&m_outputFile)->default_value(""), "output file name")
-//        ("compress,z", po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(true), "Compress output data (if supported by output format)")
+    ("input,i", po::value<std::string>(&s_inputFile)->default_value(""), "input file name")
+    ("output,o", po::value<std::string>(&s_outputFile)->default_value(""), "output file name")
     ;
 
     addSwitchSet(file_options);
@@ -77,37 +105,16 @@ void SmoothKernel::addSwitches()
     addPositionalSwitch("output", 1);
 }
 
-std::unique_ptr<Stage> SmoothKernel::makeReader(Options readerOptions)
-{
-    if (isDebug())
-    {
-        readerOptions.add("debug", true);
-        uint32_t verbosity(getVerboseLevel());
-        if (!verbosity)
-            verbosity = 1;
-
-        readerOptions.add("verbose", verbosity);
-        readerOptions.add("log", "STDERR");
-    }
-
-    Stage* stage = KernelSupport::makeReader(m_inputFile);
-    stage->setOptions(readerOptions);
-    std::unique_ptr<Stage> reader_stage(stage);
-
-    return reader_stage;
-}
-
-
 int SmoothKernel::execute()
 {
     PointContext ctx;
 
     Options readerOptions;
-    readerOptions.add("filename", m_inputFile);
+    readerOptions.add("filename", s_inputFile);
     readerOptions.add("debug", isDebug());
     readerOptions.add("verbose", getVerboseLevel());
 
-    std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
+    std::unique_ptr<Stage> readerStage = makeReader(readerOptions, s_inputFile, getVerboseLevel(), isDebug());
 
     // go ahead and prepare/execute on reader stage only to grab input
     // PointBufferSet, this makes the input PointBuffer available to both the
@@ -136,15 +143,15 @@ int SmoothKernel::execute()
     smoothOptions.add("debug", isDebug());
     smoothOptions.add("verbose", getVerboseLevel());
 
-    std::unique_ptr<Stage> smoothStage(new filters::PCLBlock());
+    std::unique_ptr<Stage> smoothStage(new PCLBlock());
     smoothStage->setOptions(smoothOptions);
     smoothStage->setInput(&bufferReader);
 
     Options writerOptions;
-    writerOptions.add("filename", m_outputFile);
+    writerOptions.add("filename", s_outputFile);
     setCommonOptions(writerOptions);
 
-    WriterPtr writer(KernelSupport::makeWriter(m_outputFile, smoothStage.get()));
+    std::unique_ptr<Writer> writer(KernelSupport::makeWriter(s_outputFile, smoothStage.get()));
     writer->setOptions(writerOptions);
 
     std::vector<std::string> cmd = getProgressShellCommand();

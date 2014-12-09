@@ -48,6 +48,8 @@
 
 #include <pcl/filters/filter_indices.h>
 
+#include <string>
+#include <vector>
 
 // Pipeline needs to be in the `pcl` namespace in order for the instantiation
 // macros to work

@@ -41,7 +41,7 @@
 
 #pragma once
 
-#include <exception>
+#include "PCLPipeline.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -64,8 +64,13 @@
 #include <pcl/segmentation/progressive_morphological_filter.h>
 #include <pcl/surface/mls.h>
 
-#include "PCLPipeline.h"
-
+#include <algorithm>
+#include <exception>
+#include <functional>
+#include <limits>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace pdal
 {
@@ -551,28 +556,28 @@ pcl::Pipeline<PointT>::applyConditionalRemoval(PointCloudConstPtr cloud, PointCl
 template <typename PointT> void
 pcl::Pipeline<PointT>::applyMovingLeastSquares(PointCloudConstPtr cloud, PointCloud &output, boost::property_tree::ptree::value_type &vt)
 {
-        // parse params
+    // parse params
 //        float r = vt.second.get<float> ("setRadiusSearch", 1.0);
 //        float k = vt.second.get<float> ("setKSearch", 0);
 
 //        PCL_DEBUG("      radius: %f\n", r);
 
 //        typename pcl::search::KdTree<PointT>::Ptr tree(new pcl::search::KdTree<PointT> ());
-        pcl::MovingLeastSquares<PointT, PointT> mls;
-        mls.setInputCloud(cloud);
-        //mls.setSearchMethod(tree);
-        mls.setSearchRadius(1);
-        mls.setPolynomialFit(true);
-        mls.setPolynomialOrder(2);
-        mls.setUpsamplingMethod(pcl::MovingLeastSquares<PointT, PointT>::SAMPLE_LOCAL_PLANE);
-        //mls.setDilationIterations(1);
-        //mls.setDilationVoxelSize(0.5);
-        //mls.setPointDensity(20);
-        mls.setUpsamplingRadius(2);
-        mls.setUpsamplingStepSize(1);
-        PCL_DEBUG("%f radius \n", mls.getUpsamplingRadius());
-        PCL_DEBUG("%f step\n", mls.getUpsamplingStepSize());
-        mls.process(output);
+    pcl::MovingLeastSquares<PointT, PointT> mls;
+    mls.setInputCloud(cloud);
+    //mls.setSearchMethod(tree);
+    mls.setSearchRadius(1);
+    mls.setPolynomialFit(true);
+    mls.setPolynomialOrder(2);
+    mls.setUpsamplingMethod(pcl::MovingLeastSquares<PointT, PointT>::SAMPLE_LOCAL_PLANE);
+    //mls.setDilationIterations(1);
+    //mls.setDilationVoxelSize(0.5);
+    //mls.setPointDensity(20);
+    mls.setUpsamplingRadius(2);
+    mls.setUpsamplingStepSize(1);
+    PCL_DEBUG("%f radius \n", mls.getUpsamplingRadius());
+    PCL_DEBUG("%f step\n", mls.getUpsamplingStepSize());
+    mls.process(output);
 
     PCL_DEBUG("%d filtered to %d in moving least squares\n", cloud->points.size(), output.points.size());
 

@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/Kernel.hpp>
+#include <pdal/pdal_export.hpp>
 
 namespace pdal
 {
@@ -45,20 +46,14 @@ public:
     SET_KERNEL_NAME("pcl", "PCL Kernel")
     SET_KERNEL_LINK("http://pdal.io/kernels/kernels.pcl.html")
 
-    PCLKernel();
+    PCLKernel()
+    {};
     int execute();
 
 private:
     void addSwitches();
     void validateSwitches();
-
-    std::unique_ptr<Stage> makeReader(Options readerOptions);
-
-    std::string m_inputFile;
-    std::string m_outputFile;
-    std::string m_pclFile;
-    bool m_bCompress;
-    bool m_bForwardMetadata;
 };
 
-} // pdal
+} // namespace pdal
+

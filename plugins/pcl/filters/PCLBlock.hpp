@@ -35,12 +35,21 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
+#include <pdal/Stage.hpp>
 #include <pdal/StageFactory.hpp>
+
+#include <memory>
+#include <set>
 
 namespace pdal
 {
-namespace filters
-{
+
+class Options;
+class PointBuffer;
+class PointContext;
+
+typedef std::shared_ptr<PointBuffer> PointBufferPtr;
+typedef std::set<PointBufferPtr> PointBufferSet;
 
 class PDAL_DLL PCLBlock : public Filter
 {
@@ -49,13 +58,10 @@ public:
     SET_STAGE_LINK("http://www.pdal.io/stages/filters.pclblock.html")
     SET_PLUGIN_VERSION("1.0.0b1")
 
-    PCLBlock() : Filter()
-    {}
+    PCLBlock()
+    {};
 
 private:
-    std::string m_filename;
-    std::string m_json;
-
     virtual void processOptions(const Options& options);
     virtual void ready(PointContext ctx);
     virtual PointBufferSet run(PointBufferPtr buf);
@@ -64,6 +70,5 @@ private:
     PCLBlock(const PCLBlock&); // not implemented
 };
 
-} // namespace filters
 } // namespace pdal
 

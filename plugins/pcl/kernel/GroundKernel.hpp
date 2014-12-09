@@ -35,19 +35,11 @@
 
 #pragma once
 
-#include <pdal/util/FileUtils.hpp>
-#include <pdal/pdal_export.hpp>
-
 #include <pdal/Kernel.hpp>
-
-#include <memory>
-#include <string>
+#include <pdal/pdal_export.hpp>
 
 namespace pdal
 {
-
-class Options;
-class Stage;
 
 class PDAL_DLL GroundKernel : public Kernel
 {
@@ -55,24 +47,13 @@ public:
     SET_KERNEL_NAME("ground", "Ground Kernel")
     SET_KERNEL_LINK("http://pdal.io/kernels/kernels.ground.html")
 
-    GroundKernel();
+    GroundKernel()
+    {};
     int execute();
 
 private:
     void addSwitches();
     void validateSwitches();
-
-    std::unique_ptr<Stage> makeReader(Options readerOptions);
-
-    std::string m_inputFile;
-    std::string m_outputFile;
-    double m_maxWindowSize;
-    double m_slope;
-    double m_maxDistance;
-    double m_initialDistance;
-    double m_cellSize;
-    bool m_classify;
-    bool m_extract;
 };
 
 } // namespace pdal

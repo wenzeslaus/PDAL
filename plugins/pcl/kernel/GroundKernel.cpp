@@ -35,15 +35,14 @@
 
 #include "GroundKernel.hpp"
 
+#include <pdal/KernelFactory.hpp>
+#include <pdal/KernelSupport.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/PointContext.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/StageFactory.hpp>
-
-#include <pdal/KernelFactory.hpp>
-#include <pdal/KernelSupport.hpp>
 
 #include <memory>
 #include <string>
@@ -54,27 +53,48 @@ CREATE_KERNEL_PLUGIN(ground, pdal::GroundKernel)
 namespace pdal
 {
 
-GroundKernel::GroundKernel()
-    : Kernel()
-    , m_inputFile("")
-    , m_outputFile("")
-    , m_maxWindowSize(33)
-    , m_slope(1)
-    , m_maxDistance(2.5)
-    , m_initialDistance(0.15)
-    , m_cellSize(1)
-    , m_classify(true)
-    , m_extract(false)
-{}
+namespace
+{
+
+static std::unique_ptr<Stage> makeReader(Options options, std::string filename, uint32_t verbosity, bool debug=true)
+{
+    if (debug)
+    {
+        options.add<bool>("debug", true);
+        if (!verbosity)
+            verbosity = 1;
+
+        options.add<uint32_t>("verbose", verbosity);
+        options.add<std::string>("log", "STDERR");
+    }
+
+    Stage* stage = KernelSupport::makeReader(filename);
+    stage->setOptions(options);
+    std::unique_ptr<Stage> reader_stage(stage);
+
+    return reader_stage;
+}
+
+static std::string s_inputFile;
+static std::string s_outputFile;
+static double s_maxWindowSize = 33;
+static double s_slope = 1;
+static double s_maxDistance = 2.5;
+static double s_initialDistance = 0.15;
+static double s_cellSize = 1;
+static bool s_classify = false;
+static bool s_extract = false;
+
+}
 
 void GroundKernel::validateSwitches()
 {
-    if (m_inputFile == "")
+    if (s_inputFile == "")
     {
         throw app_usage_error("--input/-i required");
     }
 
-    if (m_outputFile == "")
+    if (s_outputFile == "")
     {
         throw app_usage_error("--output/-o required");
     }
@@ -85,15 +105,15 @@ void GroundKernel::addSwitches()
     po::options_description* file_options = new po::options_description("file options");
 
     file_options->add_options()
-    ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
-    ("output,o", po::value<std::string>(&m_outputFile)->default_value(""), "output file name")
-    ("maxWindowSize", po::value<double>(&m_maxWindowSize)->default_value(33), "max window size")
-    ("slope", po::value<double>(&m_slope)->default_value(1), "slope")
-    ("maxDistance", po::value<double>(&m_maxDistance)->default_value(2.5), "max distance")
-    ("initialDistance", po::value<double>(&m_initialDistance)->default_value(0.15, "0.15"), "initial distance")
-    ("cellSize", po::value<double>(&m_cellSize)->default_value(1), "cell size")
-    ("classify", po::bool_switch(&m_classify), "apply classification labels?")
-    ("extract", po::bool_switch(&m_extract), "extract ground returns?")
+    ("input,i", po::value<std::string>(&s_inputFile)->default_value(""), "input file name")
+    ("output,o", po::value<std::string>(&s_outputFile)->default_value(""), "output file name")
+    ("maxWindowSize", po::value<double>(&s_maxWindowSize)->default_value(33), "max window size")
+    ("slope", po::value<double>(&s_slope)->default_value(1), "slope")
+    ("maxDistance", po::value<double>(&s_maxDistance)->default_value(2.5), "max distance")
+    ("initialDistance", po::value<double>(&s_initialDistance)->default_value(0.15, "0.15"), "initial distance")
+    ("cellSize", po::value<double>(&s_cellSize)->default_value(1), "cell size")
+    ("classify", po::bool_switch(&s_classify), "apply classification labels?")
+    ("extract", po::bool_switch(&s_extract), "extract ground returns?")
     ;
 
     addSwitchSet(file_options);
@@ -102,45 +122,25 @@ void GroundKernel::addSwitches()
     addPositionalSwitch("output", 1);
 }
 
-std::unique_ptr<Stage> GroundKernel::makeReader(Options readerOptions)
-{
-    if (isDebug())
-    {
-        readerOptions.add<bool>("debug", true);
-        uint32_t verbosity(getVerboseLevel());
-        if (!verbosity)
-            verbosity = 1;
-
-        readerOptions.add<uint32_t>("verbose", verbosity);
-        readerOptions.add<std::string>("log", "STDERR");
-    }
-
-    Stage* stage = KernelSupport::makeReader(m_inputFile);
-    stage->setOptions(readerOptions);
-    std::unique_ptr<Stage> reader_stage(stage);
-
-    return reader_stage;
-}
-
 int GroundKernel::execute()
 {
     PointContext ctx;
 
     Options readerOptions;
-    readerOptions.add<std::string>("filename", m_inputFile);
+    readerOptions.add<std::string>("filename", s_inputFile);
     readerOptions.add<bool>("debug", isDebug());
     readerOptions.add<uint32_t>("verbose", getVerboseLevel());
 
-    std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
+    std::unique_ptr<Stage> readerStage = makeReader(readerOptions, s_inputFile, getVerboseLevel(), isDebug());
 
     Options groundOptions;
-    groundOptions.add<double>("maxWindowSize", m_maxWindowSize);
-    groundOptions.add<double>("slope", m_slope);
-    groundOptions.add<double>("maxDistance", m_maxDistance);
-    groundOptions.add<double>("initialDistance", m_initialDistance);
-    groundOptions.add<double>("cellSize", m_cellSize);
-    groundOptions.add<bool>("classify", m_classify);
-    groundOptions.add<bool>("extract", m_extract);
+    groundOptions.add<double>("maxWindowSize", s_maxWindowSize);
+    groundOptions.add<double>("slope", s_slope);
+    groundOptions.add<double>("maxDistance", s_maxDistance);
+    groundOptions.add<double>("initialDistance", s_initialDistance);
+    groundOptions.add<double>("cellSize", s_cellSize);
+    groundOptions.add<bool>("classify", s_classify);
+    groundOptions.add<bool>("extract", s_extract);
 
     StageFactory f;
     std::unique_ptr<Filter> groundStage(f.createFilter("filters.ground"));
@@ -149,10 +149,10 @@ int GroundKernel::execute()
 
     // setup the Writer and write the results
     Options writerOptions;
-    writerOptions.add<std::string>("filename", m_outputFile);
+    writerOptions.add<std::string>("filename", s_outputFile);
     setCommonOptions(writerOptions);
 
-    WriterPtr writer(KernelSupport::makeWriter(m_outputFile, groundStage.get()));
+    std::unique_ptr<Writer> writer(KernelSupport::makeWriter(s_outputFile, groundStage.get()));
     writer->setOptions(writerOptions);
 
     std::vector<std::string> cmd = getProgressShellCommand();

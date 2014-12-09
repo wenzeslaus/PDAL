@@ -53,19 +53,32 @@ CREATE_FILTER_PLUGIN(ground, pdal::GroundFilter)
 namespace pdal
 {
 
+namespace
+{
+static double s_maxWindowSize;
+static double s_slope;
+static double s_maxDistance;
+static double s_initialDistance;
+static double s_cellSize;
+static bool s_classify;
+static bool s_extract;
+}
+
 void GroundFilter::processOptions(const Options& options)
 {
-    m_maxWindowSize = options.getValueOrDefault<double>("maxWindowSize", 33);
-    m_slope = options.getValueOrDefault<double>("slope", 1);
-    m_maxDistance = options.getValueOrDefault<double>("maxDistance", 2.5);
-    m_initialDistance = options.getValueOrDefault<double>("initialDistance", 0.15);
-    m_cellSize = options.getValueOrDefault<double>("cellSize", 1);
-    m_classify = options.getValueOrDefault<bool>("classify", true);
-    m_extract = options.getValueOrDefault<bool>("extract", false);
+    s_maxWindowSize = options.getValueOrDefault<double>("maxWindowSize", 33);
+    s_slope = options.getValueOrDefault<double>("slope", 1);
+    s_maxDistance = options.getValueOrDefault<double>("maxDistance", 2.5);
+    s_initialDistance = options.getValueOrDefault<double>("initialDistance", 0.15);
+    s_cellSize = options.getValueOrDefault<double>("cellSize", 1);
+    s_classify = options.getValueOrDefault<bool>("classify", true);
+    s_extract = options.getValueOrDefault<bool>("extract", false);
 }
 
 void GroundFilter::addDimensions(PointContextRef ctx)
-{ ctx.registerDim(Dimension::Id::Classification); }
+{
+    ctx.registerDim(Dimension::Id::Classification);
+}
 
 PointBufferSet GroundFilter::run(PointBufferPtr input)
 {
@@ -107,40 +120,44 @@ PointBufferSet GroundFilter::run(PointBufferPtr input)
     // setup the PMF filter
     pcl::ProgressiveMorphologicalFilter<pcl::PointXYZ> pmf;
     pmf.setInputCloud(cloud);
-    pmf.setMaxWindowSize(m_maxWindowSize);
-    pmf.setSlope(m_slope);
-    pmf.setMaxDistance(m_maxDistance);
-    pmf.setInitialDistance(m_initialDistance);
-    pmf.setCellSize(m_cellSize);
+    pmf.setMaxWindowSize(s_maxWindowSize);
+    pmf.setSlope(s_slope);
+    pmf.setMaxDistance(s_maxDistance);
+    pmf.setInitialDistance(s_initialDistance);
+    pmf.setCellSize(s_cellSize);
 
     // run the PMF filter, grabbing indices of ground returns
     pcl::PointIndicesPtr idx(new pcl::PointIndices);
     pmf.extract(idx->indices);
 
-    if (!idx->indices.empty() && (m_classify || m_extract))
+    if (!idx->indices.empty() && (s_classify || s_extract))
     {
         PointBufferSet pbSet;
 
-        if (m_classify)
+        if (s_classify)
         {
             log()->get(LogLevel::Debug2) << "Labeled " << idx->indices.size() << " ground returns!\n";
 
             // set the classification label of ground returns as 2
             // (corresponding to ASPRS LAS specification)
             for (const auto& i : idx->indices)
-            { input->setField(Dimension::Id::Classification, i, 2); }
+            {
+                input->setField(Dimension::Id::Classification, i, 2);
+            }
 
             pbSet.insert(input);
         }
 
-        if (m_extract)
+        if (s_extract)
         {
             log()->get(LogLevel::Debug2) << "Extracted " << idx->indices.size() << " ground returns!\n";
 
             // create new PointBuffer containing only ground returns
             PointBufferPtr output = input->makeNew();
             for (const auto& i : idx->indices)
-            { output->appendPoint(*input, i); }
+            {
+                output->appendPoint(*input, i);
+            }
 
             pbSet.erase(input);
             pbSet.insert(output);
@@ -153,7 +170,7 @@ PointBufferSet GroundFilter::run(PointBufferPtr input)
         if (idx->indices.empty())
             log()->get(LogLevel::Debug2) << "Filtered cloud has no ground returns!\n";
 
-        if (!(m_classify || m_extract))
+        if (!(s_classify || s_extract))
             log()->get(LogLevel::Debug2) << "Must choose --classify or --extract\n";
 
         // return the input buffer unchanged

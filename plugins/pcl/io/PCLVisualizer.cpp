@@ -34,13 +34,8 @@
 
 #include "PCLVisualizer.hpp"
 
-#include <chrono>
-#include <memory>
-#include <thread>
-
 #include <pcl/conversions.h>
 #include <pcl/io/pcd_io.h>
-
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wfloat-equal"
@@ -51,21 +46,32 @@
 #include <pcl/visualization/impl/point_cloud_handlers.hpp>
 #pragma GCC diagnostic pop
 
-#include "PCLConversions.hpp"
-#include "point_types.hpp"
+#include <pdal/pdal_macros.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/util/Bounds.hpp>
+
+#include "PCLConversions.hpp"
+#include "point_types.hpp"
+
+#include <chrono>
+#include <memory>
+#include <string>
+#include <thread>
 
 CREATE_WRITER_PLUGIN(pclvisualizer, pdal::PclVisualizer)
 
-bool
-isValidFieldName(const std::string &field)
+namespace
+{
+bool isValidFieldName(const std::string &field)
 {
     if (field == "_")
         return (false);
 
     return (true);
 }
+}
+
 
 namespace pcl
 {
@@ -137,7 +143,6 @@ private:
 namespace pdal
 {
 
-
 void PclVisualizer::write(const PointBuffer& data)
 {
     // Determine XYZ bounds
@@ -189,4 +194,5 @@ void PclVisualizer::write(const PointBuffer& data)
 }
 
 
-} // namespaces
+} // namespace pdal
+

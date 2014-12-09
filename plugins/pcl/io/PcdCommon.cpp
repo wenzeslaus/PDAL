@@ -34,6 +34,8 @@
 
 #include "PcdCommon.hpp"
 
+#include <pdal/Dimension.hpp>
+
 namespace pdal
 {
 
@@ -54,3 +56,4 @@ Dimension::IdList fileDimensions()
 }
 
 } // namespace pdal
+

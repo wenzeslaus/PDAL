@@ -33,32 +33,35 @@
 ****************************************************************************/
 
 #include "PcdWriter.hpp"
-#include "point_types.hpp"
-
-#include <algorithm>
-#include <iostream>
-#include <map>
-
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/erase.hpp>
 
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/impl/pcd_io.hpp>
 
-#include "PCLConversions.hpp"
-#include <pdal/PointBuffer.hpp>
+#include <pdal/Options.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/util/Bounds.hpp>
+
+#include "PCLConversions.hpp"
+#include "point_types.hpp"
+
+#include <string>
 
 CREATE_WRITER_PLUGIN(pcd, pdal::PcdWriter)
 
 namespace pdal
 {
 
+namespace
+{
+static std::string s_filename;
+static bool s_compressed;
+}
 
 void PcdWriter::processOptions(const Options& ops)
 {
-    m_filename = ops.getValueOrThrow<std::string>("filename");
-    m_compressed = ops.getValueOrDefault("compression", false);
+    s_filename = ops.getValueOrThrow<std::string>("filename");
+    s_compressed = ops.getValueOrDefault("compression", false);
 }
 
 
@@ -81,10 +84,10 @@ void PcdWriter::write(const PointBuffer& data)
 
     pcl::PCDWriter w;
 
-    if (m_compressed)
-        w.writeBinaryCompressed<XYZIRGBA>(m_filename, *cloud);
+    if (s_compressed)
+        w.writeBinaryCompressed<XYZIRGBA>(s_filename, *cloud);
     else
-        w.writeASCII<XYZIRGBA>(m_filename, *cloud);
+        w.writeASCII<XYZIRGBA>(s_filename, *cloud);
 }
 
 

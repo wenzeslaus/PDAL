@@ -34,22 +34,32 @@
 
 #include "gtest/gtest.h"
 
+#include <pdal/Filter.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/PointContext.hpp>
 #include <pdal/StageFactory.hpp>
 
 #include "Support.hpp"
+
+#include <memory>
+#include <string>
 
 #undef RUN_SLOW_TESTS
 
 using namespace pdal;
 
-TEST(PCLBlockFilterTest, PCLBlockFilterTest_example_passthrough_xml)
+TEST(PCLBlockFilterTest, createFilter)
 {
     StageFactory f;
-    FilterPtr filter(f.createFilter("filters.pclblock"));
+    std::unique_ptr<Filter> filter(f.createFilter("filters.pclblock"));
     EXPECT_TRUE(filter.get());
+}
 
+
+TEST(PCLBlockFilterTest, PCLBlockFilterTest_example_passthrough_xml)
+{
     PipelineManager pipeline;
     PipelineReader pipelineReader(pipeline);
     pipelineReader.readPipeline(Support::datapath("filters/pcl/passthrough.xml"));

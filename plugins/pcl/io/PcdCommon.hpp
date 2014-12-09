@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/Dimension.hpp>
+#include <pdal/pdal_export.hpp>
 
 namespace pdal
 {

@@ -33,18 +33,46 @@
 ****************************************************************************/
 
 #include "ViewKernel.hpp"
+
 #include <pdal/KernelFactory.hpp>
+
+#include <string>
+#include <vector>
 
 CREATE_KERNEL_PLUGIN(view, pdal::ViewKernel)
 
 namespace pdal
 {
 
-// Support for parsing point numbers.  Points can be specified singly or as
-// dash-separated ranges.  i.e. 6-7,8,19-20
-namespace {
+namespace
+{
 
 using namespace std;
+
+static std::unique_ptr<Stage> makeReader(Options options, std::string filename, uint32_t verbosity, bool debug=true)
+{
+    if (debug)
+    {
+        options.add<bool>("debug", true);
+        if (!verbosity)
+            verbosity = 1;
+
+        options.add<uint32_t>("verbose", verbosity);
+        options.add<std::string>("log", "STDERR");
+    }
+
+    Stage* stage = KernelSupport::makeReader(filename);
+    stage->setOptions(options);
+    std::unique_ptr<Stage> reader_stage(stage);
+
+    return reader_stage;
+}
+
+static std::string s_inputFile;
+static std::string s_pointIndexes;
+
+// Support for parsing point numbers.  Points can be specified singly or as
+// dash-separated ranges.  i.e. 6-7,8,19-20
 
 vector<string> tokenize(const string s, char c)
 {
@@ -75,15 +103,13 @@ uint32_t parseInt(const string& s)
     }
 }
 
-
 void addSingle(const string& s, vector<uint32_t>& points)
 {
     points.push_back(parseInt(s));
 }
 
-
 void addRange(const string& begin, const string& end,
-    vector<uint32_t>& points)
+              vector<uint32_t>& points)
 {
     uint32_t low = parseInt(begin);
     uint32_t high = parseInt(end);
@@ -92,7 +118,6 @@ void addRange(const string& begin, const string& end,
     while (low <= high)
         points.push_back(low++);
 }
-
 
 vector<uint32_t> getListOfPoints(std::string p)
 {
@@ -117,32 +142,21 @@ vector<uint32_t> getListOfPoints(std::string p)
 
 } //namespace
 
-ViewKernel::ViewKernel()
-    : Kernel()
-    , m_inputFile("")
-{
-    return;
-}
-
-
 void ViewKernel::validateSwitches()
 {
-    if (m_inputFile == "")
+    if (s_inputFile == "")
     {
         throw app_usage_error("--input/-i required");
     }
-
-    return;
 }
-
 
 void ViewKernel::addSwitches()
 {
     po::options_description* file_options = new po::options_description("file options");
 
     file_options->add_options()
-    ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
-    ("point,p", po::value<std::string >(&m_pointIndexes), "point to dump")
+    ("input,i", po::value<std::string>(&s_inputFile)->default_value(""), "input file name")
+    ("point,p", po::value<std::string >(&s_pointIndexes), "point to dump")
     ;
 
     addSwitchSet(file_options);
@@ -150,45 +164,24 @@ void ViewKernel::addSwitches()
     addPositionalSwitch("input", 1);
 }
 
-std::unique_ptr<Stage> ViewKernel::makeReader(Options readerOptions)
-{
-    if (isDebug())
-    {
-        readerOptions.add<bool>("debug", true);
-        uint32_t verbosity(getVerboseLevel());
-        if (!verbosity)
-            verbosity = 1;
-
-        readerOptions.add<uint32_t>("verbose", verbosity);
-        readerOptions.add<std::string>("log", "STDERR");
-    }
-
-    Stage* stage = KernelSupport::makeReader(m_inputFile);
-    stage->setOptions(readerOptions);
-    std::unique_ptr<Stage> reader_stage(stage);
-
-    return reader_stage;
-}
-
-
 int ViewKernel::execute()
 {
     Options readerOptions;
-    readerOptions.add<std::string>("filename", m_inputFile);
+    readerOptions.add<std::string>("filename", s_inputFile);
     readerOptions.add<bool>("debug", isDebug());
     readerOptions.add<uint32_t>("verbose", getVerboseLevel());
 
-    std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
+    std::unique_ptr<Stage> readerStage = makeReader(readerOptions, s_inputFile, getVerboseLevel(), isDebug());
     PointContext ctx;
     readerStage->prepare(ctx);
     PointBufferSet pbSetIn = readerStage->execute(ctx);
-    
+
     PointBufferPtr buf = *pbSetIn.begin();
-    if (m_pointIndexes.size())
+    if (s_pointIndexes.size())
     {
         PointBufferPtr outbuf = buf->makeNew();
 
-        std::vector<uint32_t> points = getListOfPoints(m_pointIndexes);
+        std::vector<uint32_t> points = getListOfPoints(s_pointIndexes);
         for (size_t i = 0; i < points.size(); ++i)
         {
             PointId id = (PointId)points[i];

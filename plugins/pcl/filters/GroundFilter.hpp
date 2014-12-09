@@ -36,8 +36,10 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/Stage.hpp>
+#include <pdal/StageFactory.hpp>
 
 #include <memory>
+#include <set>
 
 namespace pdal
 {
@@ -47,6 +49,7 @@ class PointBuffer;
 class PointContext;
 
 typedef std::shared_ptr<PointBuffer> PointBufferPtr;
+typedef std::set<PointBufferPtr> PointBufferSet;
 typedef PointContext PointContextRef;
 
 class PDAL_DLL GroundFilter : public Filter
@@ -56,21 +59,12 @@ public:
     SET_STAGE_LINK("http://www.pdal.io/stages/filters.ground.html")
     SET_PLUGIN_VERSION("1.0.0b1")
 
-    GroundFilter() : Filter()
+    GroundFilter()
     {}
 
 private:
-    double m_maxWindowSize;
-    double m_slope;
-    double m_maxDistance;
-    double m_initialDistance;
-    double m_cellSize;
-    bool m_classify;
-    bool m_extract;
-
     virtual void addDimensions(PointContextRef ctx);
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContext ctx) {};
     virtual PointBufferSet run(PointBufferPtr buf);
 
     GroundFilter& operator=(const GroundFilter&); // not implemented

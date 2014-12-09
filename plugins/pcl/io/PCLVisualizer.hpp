@@ -34,21 +34,31 @@
 
 #pragma once
 
+#include <pdal/pdal_export.hpp>
+#include <pdal/Stage.hpp>
+#include <pdal/StageFactory.hpp>
 #include <pdal/Writer.hpp>
 
-#include <string>
+#include <memory>
 
 namespace pdal
 {
 
-class PDAL_DLL PclVisualizer : public pdal::Writer
+class Options;
+class PointBuffer;
+class PointContext;
+
+typedef PointContext PointContextRef;
+
+class PDAL_DLL PclVisualizer : public Writer
 {
 public:
     SET_STAGE_NAME("writers.pclvisualizer", "PCD Writer")
     SET_STAGE_LINK("http://pdal.io/stages/writers.pclvisualizer.html")
     SET_PLUGIN_VERSION("1.0.0b1")
 
-    PclVisualizer() : pdal::Writer() {};
+    PclVisualizer()
+    {};
 
 private:
     virtual void processOptions(const Options&) {};
@@ -59,4 +69,5 @@ private:
     PclVisualizer(const PclVisualizer&); // not implemented
 };
 
-} // namespaces
+} // namespace pdal
+

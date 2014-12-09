@@ -34,37 +34,36 @@
 
 #pragma once
 
-#include <pdal/Writer.hpp>
-#include <pdal/util/FileUtils.hpp>
+#include <pdal/pdal_export.hpp>
+#include <pdal/Stage.hpp>
 #include <pdal/StageFactory.hpp>
-
-#include <vector>
-#include <string>
+#include <pdal/Writer.hpp>
 
 namespace pdal
 {
 
-class PDAL_DLL PcdWriter : public pdal::Writer
+class Options;
+class PointBuffer;
+
+class PDAL_DLL PcdWriter : public Writer
 {
 public:
     SET_STAGE_NAME("writers.pcd", "Write data in Point Cloud Library (PCL) format.")
     SET_STAGE_LINK("http://pdal.io/stages/writers.pcd.html")
     SET_PLUGIN_VERSION("1.0.0b1")
 
-    PcdWriter() : pdal::Writer() {};
+    PcdWriter()
+    {};
 
     static Options getDefaultOptions();
 
 private:
     virtual void processOptions(const Options&);
-    virtual void ready(PointContextRef ctx) {};
     virtual void write(const PointBuffer& buf);
-
-    std::string m_filename;
-    bool m_compressed;
 
     PcdWriter& operator=(const PcdWriter&); // not implemented
     PcdWriter(const PcdWriter&); // not implemented
 };
 
-} // namespaces
+} // namespace pdal
+
