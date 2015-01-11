@@ -36,7 +36,7 @@
 
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <QfitReader.hpp>
+#include <qfit/QfitReader.hpp>
 #include "Support.hpp"
 
 #include <iostream>

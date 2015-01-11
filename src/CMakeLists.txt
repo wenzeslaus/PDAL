@@ -15,7 +15,11 @@
 #   PDAL_<dirname>_CPP - all the .cpp files for the given subdir/namespace
 #   ...
 
+add_subdirectory(io)
+add_subdirectory(filters)
+add_subdirectory(kernels)
 
+set(PDAL_HEADERS_DIR "${PROJECT_SOURCE_DIR}/include/pdal")
 set(PDAL_HPP "")
 set(PDAL_CPP "")
 
@@ -51,6 +55,10 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/gitsha.h"
   "${PDAL_HEADERS_DIR}/IStream.hpp"
   "${PDAL_HEADERS_DIR}/KDIndex.hpp"
+  "${PDAL_HEADERS_DIR}/Kernel.hpp"
+  "${PDAL_HEADERS_DIR}/KernelFactory.hpp"
+  "${PDAL_HEADERS_DIR}/KernelInfo.hpp"
+  "${PDAL_HEADERS_DIR}/KernelSupport.hpp"
   "${PDAL_HEADERS_DIR}/Log.hpp"
   "${PDAL_HEADERS_DIR}/Metadata.hpp"
   "${PDAL_HEADERS_DIR}/Options.hpp"
@@ -73,7 +81,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/UserCallback.hpp"
   "${PDAL_HEADERS_DIR}/Utils.hpp"
   "${PDAL_HEADERS_DIR}/Writer.hpp"
-  "${PDAL_HEADERS_DIR}/Kernels.hpp"
     ${PDAL_XML_HEADER}
     ${DB_DRIVER_HEADERS}
 )
@@ -86,6 +93,10 @@ set(PDAL_BASE_CPP
   GDALUtils.cpp
   GlobalEnvironment.cpp
   KDIndex.cpp
+  Kernel.cpp
+  KernelFactory.cpp
+  KernelInfo.cpp
+  KernelSupport.cpp
   Log.cpp
   Options.cpp
   PDALUtils.cpp

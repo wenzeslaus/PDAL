@@ -34,7 +34,8 @@
 
 #include "gtest/gtest.h"
 
-#include <FauxReader.hpp>
+#include <faux/FauxReader.hpp>
+#include <pdal/util/Bounds.hpp>
 
 using namespace pdal;
 

@@ -40,6 +40,7 @@
 #include <pdal/Dimension.hpp>
 #include <pdal/pdal_defines.h>
 #include <pdal/pdal_export.hpp>
+#include <pdal/util/Bounds.hpp>
 #include <pdal/PointContext.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Options.hpp>

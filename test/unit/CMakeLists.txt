@@ -19,26 +19,6 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/include
     ${GDAL_INCLUDE_DIR}
     ${GEOTIFF_INCLUDE_DIR}
-    ${PROJECT_SOURCE_DIR}/io/bpf
-    ${PROJECT_SOURCE_DIR}/io/buffer
-    ${PROJECT_SOURCE_DIR}/io/faux
-    ${PROJECT_SOURCE_DIR}/io/las
-    ${PROJECT_SOURCE_DIR}/io/qfit
-    ${PROJECT_SOURCE_DIR}/io/sbet
-    ${PROJECT_SOURCE_DIR}/io/text
-    ${PROJECT_SOURCE_DIR}/io/terrasolid
-    ${PROJECT_SOURCE_DIR}/filters/chipper
-    ${PROJECT_SOURCE_DIR}/filters/colorization
-    ${PROJECT_SOURCE_DIR}/filters/crop
-    ${PROJECT_SOURCE_DIR}/filters/decimation
-    ${PROJECT_SOURCE_DIR}/filters/ferry
-    ${PROJECT_SOURCE_DIR}/filters/mortonorder
-    ${PROJECT_SOURCE_DIR}/filters/reprojection
-    ${PROJECT_SOURCE_DIR}/filters/sort
-    ${PROJECT_SOURCE_DIR}/filters/splitter
-    ${PROJECT_SOURCE_DIR}/filters/stats
-    ${PROJECT_SOURCE_DIR}/filters/transformation
-    ${PROJECT_SOURCE_DIR}/kernels/info
 )
 
 PDAL_ADD_TEST(pdal_bounds_test FILES BoundsTest.cpp)

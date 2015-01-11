@@ -37,7 +37,7 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/BufferReader.hpp>
-#include <StatsFilter.hpp>
+#include <stats/StatsFilter.hpp>
 
 using namespace pdal;
 

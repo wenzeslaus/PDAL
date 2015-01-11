@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 
+#include <pdal/util/Bounds.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>

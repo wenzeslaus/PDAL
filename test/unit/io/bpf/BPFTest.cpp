@@ -39,7 +39,7 @@
 #include <pdal/Utils.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <BpfReader.hpp>
+#include <bpf/BpfReader.hpp>
 
 #include "Support.hpp"
 

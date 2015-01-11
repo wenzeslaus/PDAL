@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/DbWriter.hpp>
+#include <pdal/util/Bounds.hpp>
 #include <pdal/GDALUtils.hpp>
 
 pdal::Writer* createOciWriter();

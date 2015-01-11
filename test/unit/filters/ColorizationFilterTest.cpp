@@ -34,8 +34,8 @@
 
 #include "gtest/gtest.h"
 
-#include <LasReader.hpp>
-#include <ColorizationFilter.hpp>
+#include <las/LasReader.hpp>
+#include <colorization/ColorizationFilter.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include "Support.hpp"

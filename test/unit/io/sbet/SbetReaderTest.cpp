@@ -39,7 +39,7 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PointBuffer.hpp>
 
-#include <SbetReader.hpp>
+#include <sbet/SbetReader.hpp>
 
 #include "StageTester.hpp"
 #include "Support.hpp"

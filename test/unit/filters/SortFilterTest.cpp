@@ -36,7 +36,7 @@
 
 #include <random>
 
-#include <SortFilter.hpp>
+#include <sort/SortFilter.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
 #include "Support.hpp"

@@ -35,8 +35,8 @@
 #include "gtest/gtest.h"
 
 #include <pdal/SpatialReference.hpp>
-#include <LasReader.hpp>
-#include <ReprojectionFilter.hpp>
+#include <las/LasReader.hpp>
+#include <reprojection/ReprojectionFilter.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include "Support.hpp"

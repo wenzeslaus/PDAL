@@ -37,6 +37,7 @@
 
 #include <iostream>
 
+#include <pdal/util/Bounds.hpp>
 #include <pdal/Dimension.hpp>
 #include <pdal/Utils.hpp>
 #include <pdal/FileUtils.hpp>

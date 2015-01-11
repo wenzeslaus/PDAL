@@ -34,10 +34,11 @@
 ****************************************************************************/
 
 #include "SmoothKernel.hpp"
-#include "../filters/PCLBlock.hpp"
-#include "KernelFactory.hpp"
+
+#include "PCLBlock.hpp"
 
 #include <pdal/BufferReader.hpp>
+#include <pdal/KernelFactory.hpp>
 
 CREATE_KERNEL_PLUGIN(smooth, pdal::SmoothKernel)
 

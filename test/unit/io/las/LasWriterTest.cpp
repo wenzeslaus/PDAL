@@ -37,9 +37,9 @@
 #include <stdlib.h>
 
 #include <pdal/FileUtils.hpp>
-#include <LasHeader.hpp>
-#include <LasReader.hpp>
-#include <LasWriter.hpp>
+#include <las/LasHeader.hpp>
+#include <las/LasReader.hpp>
+#include <las/LasWriter.hpp>
 
 #include <pdal/PointBuffer.hpp>
 
