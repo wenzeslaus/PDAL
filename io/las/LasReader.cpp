@@ -477,37 +477,36 @@ void LasReader::loadPoint(PointBuffer& data, char *buf, size_t bufsize)
 }
 
 
+/// Read a single value of type T and increment buf by sizeof(T) bytes
+template<typename T>
+inline T& readLE(char*& buf)
+{
+    T& val = *reinterpret_cast<T*>(buf);
+    buf += sizeof(T);
+    return val;
+}
+
+
 void LasReader::loadPointV10(PointBuffer& data, char *buf, size_t bufsize)
 {
-    // Turn a raw buffer (array of bytes) into a stream buf.
-    Charbuf charstreambuf(buf, bufsize, 0);
-
-    // Make an input stream based on the stream buf.
-    std::istream stream(&charstreambuf);
-
-    // Wrap the input stream with byte ordering.
-    ILeStream istream(&stream);
-
     PointId nextId = data.size();
 
-    int32_t xi, yi, zi;
-    istream >> xi >> yi >> zi;
+    int32_t xi = readLE<int32_t>(buf);
+    int32_t yi = readLE<int32_t>(buf);
+    int32_t zi = readLE<int32_t>(buf);
 
     const LasHeader& h = m_lasHeader;
-            
+
     double x = xi * h.scaleX() + h.offsetX();
     double y = yi * h.scaleY() + h.offsetY();
     double z = zi * h.scaleZ() + h.offsetZ();
 
-    uint16_t intensity;
-    uint8_t flags;
-    uint8_t classification;
-    int8_t scanAngleRank;
-    uint8_t user;
-    uint16_t pointSourceId;
-
-    istream >> intensity >> flags >> classification >> scanAngleRank >>
-        user >> pointSourceId;
+    uint16_t intensity     = readLE<uint16_t>(buf);
+    uint8_t flags          = readLE<uint8_t>(buf);
+    uint8_t classification = readLE<uint8_t>(buf);
+    int8_t scanAngleRank   = readLE<int8_t>(buf);
+    uint8_t user           = readLE<uint8_t>(buf);
+    uint16_t pointSourceId = readLE<uint16_t>(buf);
 
     uint8_t returnNum = flags & 0x07;
     uint8_t numReturns = (flags >> 3) & 0x07;
@@ -535,15 +534,15 @@ void LasReader::loadPointV10(PointBuffer& data, char *buf, size_t bufsize)
 
     if (h.hasTime())
     {
-        double time;
-        istream >> time;
+        double time = readLE<double>(buf);
         data.setField(Dimension::Id::GpsTime, nextId, time);
     }
 
     if (h.hasColor())
     {
-        uint16_t red, green, blue;
-        istream >> red >> green >> blue;
+        uint16_t red   = readLE<uint16_t>(buf);
+        uint16_t green = readLE<uint16_t>(buf);
+        uint16_t blue  = readLE<uint16_t>(buf);
         data.setField(Dimension::Id::Red, nextId, red);
         data.setField(Dimension::Id::Green, nextId, green);
         data.setField(Dimension::Id::Blue, nextId, blue);
