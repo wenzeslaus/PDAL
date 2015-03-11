@@ -41,7 +41,6 @@
 #include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>
 
-#include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
@@ -125,13 +124,11 @@ private:
 	
     bool m_3d;
     bool m_OutputDetail;
-    bool m_useXML;
     bool m_useJSON;
     std::unique_ptr<KDIndex> m_index;
 
     
     void outputRST(boost::property_tree::ptree const&) const;
-    void outputXML(boost::property_tree::ptree const&) const;
     void outputJSON(boost::property_tree::ptree const&) const;
     void outputDetail(PointBuffer& source_data, PointBuffer& candidate_data,
         std::map<Point, Point> *points) const;

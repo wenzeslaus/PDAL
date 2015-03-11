@@ -40,7 +40,6 @@
 
 #include <boost/program_options.hpp>
 #include <boost/property_tree/json_parser.hpp>
-#include <boost/property_tree/xml_parser.hpp>
 
 using boost::property_tree::ptree;
 
@@ -60,7 +59,6 @@ DiffKernel::DiffKernel()
     : Kernel()
     , m_sourceFile("")
     , m_candidateFile("")
-    , m_useXML(false)
     , m_useJSON(false)
 
 {}
@@ -86,9 +84,6 @@ void DiffKernel::addSwitches()
         ("source", po::value<std::string>(&m_sourceFile), "source file name")
         ("candidate",
             po::value<std::string>(&m_candidateFile), "candidate file name")
-        ("xml",
-            po::value<bool>(&m_useXML)->zero_tokens()->implicit_value(true),
-            "dump XML")
         ("json",
             po::value<bool>(&m_useJSON)->zero_tokens()->implicit_value(true),
             "dump JSON")

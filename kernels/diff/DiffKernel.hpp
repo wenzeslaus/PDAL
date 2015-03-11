@@ -68,7 +68,6 @@ private:
         boost::property_tree::ptree& errors);
     std::string m_sourceFile;
     std::string m_candidateFile;
-    bool m_useXML;
     bool m_useJSON;
 };
 

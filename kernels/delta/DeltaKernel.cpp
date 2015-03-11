@@ -56,7 +56,6 @@ DeltaKernel::DeltaKernel()
     , m_outputStream(0)
     , m_3d(true)
     , m_OutputDetail(false)
-    , m_useXML(false)
     , m_useJSON(false)
 {}
 
@@ -82,8 +81,6 @@ void DeltaKernel::addSwitches()
          "Output deltas per-point")
         ("output", po::value<std::string>(&m_outputFileName),
          "output file name")
-        ("xml", po::value<bool>(&m_useXML)->zero_tokens()->implicit_value(true),
-         "dump XML")
         ("json",
          po::value<bool>(&m_useJSON)->zero_tokens()->implicit_value(true),
          "dump JSON");
@@ -196,10 +193,7 @@ void DeltaKernel::outputDetail(PointBuffer& source_data, PointBuffer& candidate_
 
     }
 
-    if (m_useXML)
-    {
-        boost::property_tree::write_xml(ostr, output);
-    } else if (m_useJSON)
+    if (m_useJSON)
     {
         boost::property_tree::write_json(ostr, output);
 
@@ -268,12 +262,6 @@ void DeltaKernel::outputRST(boost::property_tree::ptree const& tree) const
 void DeltaKernel::outputJSON(boost::property_tree::ptree const& tree) const
 {
     boost::property_tree::write_json(std::cout, tree);
-
-}
-
-void DeltaKernel::outputXML(boost::property_tree::ptree const& tree) const
-{
-    boost::property_tree::write_xml(std::cout, tree);
 
 }
 
@@ -370,8 +358,6 @@ int DeltaKernel::execute()
 
     if (m_useJSON)
         outputJSON(output);
-    else if (m_useXML)
-        outputXML(output);
     else
         outputRST(output);
     return 0;
