@@ -106,8 +106,14 @@ test_script:
   - ps: pwd
   - ps: ls
   - cd bin
+  - ps: pwd
   - ps: ls
-  - cd ..
+  - cd C:/projects/pdal/bin
+  - ps: pwd
+  - ps: ls
+  - cd C:/projects/pdal
+  - ps: pwd
+  - ps: ls
   - ctest --output-on-failure -C Release -VV
 
 matrix:
