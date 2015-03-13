@@ -44,6 +44,12 @@ install:
   - set CXX=cl.exe
 
   - echo Run CMake to generate our solution/ninja code
+  - ps: pwd
+  - ps: ls
+  - ps: mkdir build
+  - cd build
+  - ps: pwd
+  - ps: ls
   - cmake -G "Ninja"
     -DCMAKE_BUILD_TYPE=Release
     -DCMAKE_MAKE_PROGRAM=C:/tools/ninja/ninja.exe
@@ -70,7 +76,7 @@ install:
     -DWITH_LIBXML2=OFF
     -DWITH_TESTS=ON
     -Dgtest_force_shared_crt=ON
-    .
+    ..
 
 cache:
   # this should cache our OSGeo4W install between jobs in the build matrix
@@ -82,6 +88,8 @@ build:
   verbosity: detailed
 
 build_script:
+  - ps: pwd
+  - cd C:/projects/pdal/build
   - ps: pwd
   - ps: ls
   - C:/tools/ninja/ninja.exe
@@ -103,15 +111,10 @@ notifications:
 
 test_script:
   - "SET PATH=%OSGEODIR%/bin;%PATH%"
+  - cd C:/projects/pdal/build/bin
   - ps: pwd
   - ps: ls
-  - cd bin
-  - ps: pwd
-  - ps: ls
-  - cd C:/projects/pdal/bin
-  - ps: pwd
-  - ps: ls
-  - cd C:/projects/pdal/test/unit
+  - cd C:/projects/pdal/build
   - ps: pwd
   - ps: ls
   - ctest --output-on-failure -C Release -VV
