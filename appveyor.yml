@@ -102,6 +102,7 @@ notifications:
 
 test_script:
   - "SET PATH=%OSGEODIR%/bin;%PATH%"
+  - ps: ls bin
   - ctest --output-on-failure -C Release -VV
 
 matrix:
