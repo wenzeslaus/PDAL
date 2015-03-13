@@ -10,35 +10,81 @@ configuration: Release
 environment:
   # set the directory to use for OSGeo4W install, our CMake find packages know
   # to look here
-  OSGEODIR: C:\OSGeo4W64
+  OSGEODIR: C:/OSGeo4W64
 
   matrix:
     - PDAL_OPTIONAL_COMPONENTS: OFF
     - PDAL_OPTIONAL_COMPONENTS: ON
 
 install:
+  - echo Install ninja via Chocolatey
+  - cinst ninja
+
+  - echo Verify ninja and cmake versions for a sanity check
+  - C:/tools/ninja/ninja.exe --version
+  - cmake --version
+
   # make a temp directory for downloading osgeo4w-setup.exe
   # this may not matter as much if part of the install step, as pdal has
   # already been cloned, otherwise git would complain about a non-empty
   # directory
-  - ps: mkdir C:\temp | out-null
-  # make the osgeo directory
-  - ps: mkdir %OSGEODIR% | out-null
-  # get the OSGeo installer
-  - ps: wget http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe -OutFile C:\temp\osgeo4w-setup.exe | out-null
-  # and install our dependencies
-  - C:\temp\osgeo4w-setup.exe -s http://download.osgeo.org/osgeo4w/ -a -q -P boost-devel,gdal,geos,hexer,iconv,laszip,libgeotiff,libtiff,libpq,libxml2,nitro,pcl,points2grid,proj,python-numpy,zlib -R %OSGEODIR% > nul
-  # call our PDAL install script
-  - call .\\scripts\\appveyor\\install.cmd
+  - ps: mkdir C:/temp | out-null
+  
+  - ps: mkdir "%OSGEODIR%"
+  
+  - echo Download and install PDAL dependencies using OSGeo4W64 installers
+  - ps: wget http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe -OutFile C:/temp/osgeo4w-setup.exe | out-null
+  - C:/temp/osgeo4w-setup.exe -s http://download.osgeo.org/osgeo4w/ -a -q -P boost-devel,gdal,geos,hexer,iconv,laszip,libgeotiff,libtiff,libpq,libxml2,nitro,pcl,points2grid,proj,python-numpy,zlib -R "%OSGEODIR%" > nul
+ 
+  - echo Setup the Visual Studio 11 (MSVC2012) environment
+  - call "%VS110COMNTOOLS%../../VC/vcvarsall.bat" x86_amd64
+
+  - echo The compilers may be in the path at this point. Check!
+  - set CC=cl.exe
+  - set CXX=cl.exe
+
+  - echo Run CMake to generate our solution/ninja code
+  - cmake -G "Ninja"
+    -DCMAKE_BUILD_TYPE=Release
+    -DCMAKE_MAKE_PROGRAM=C:/tools/ninja/ninja.exe
+    -DBUILD_PLUGIN_ATTRIBUTE=%PDAL_OPTIONAL_COMPONENTS%
+    -DBUILD_PLUGIN_CPD=OFF
+    -DBUILD_PLUGIN_GREYHOUND=OFF
+    -DBUILD_PLUGIN_HEXBIN=OFF
+    -DBUILD_PLUGIN_ICEBRIDGE=OFF
+    -DBUILD_PLUGIN_MRSID=OFF
+    -DBUILD_PLUGIN_NITF=OFF
+    -DBUILD_PLUGIN_OCI=OFF
+    -DBUILD_PLUGIN_P2G=OFF
+    -DBUILD_PLUGIN_PCL=OFF
+    -DBUILD_PLUGIN_PGPOINTCLOUD=OFF
+    -DBUILD_PLUGIN_SQLITE=OFF
+    -DBUILD_PLUGIN_RIVLIB=OFF
+    -DBUILD_PLUGIN_PYTHON=%PDAL_OPTIONAL_COMPONENTS%
+    -DENABLE_CTEST=OFF
+    -DWITH_APPS=ON
+    -DWITH_LAZPERF=%PDAL_OPTIONAL_COMPONENTS%
+    -DWITH_GEOTIFF=%PDAL_OPTIONAL_COMPONENTS%
+    -DWITH_ICONV=%PDAL_OPTIONAL_COMPONENTS%
+    -DWITH_LASZIP=%PDAL_OPTIONAL_COMPONENTS%
+    -DWITH_LIBXML2=OFF
+    -DWITH_TESTS=ON
+    -Dgtest_force_shared_crt=ON
+    .
 
 cache:
   # this should cache our OSGeo4W install between jobs in the build matrix
-  - C:\OSGeo4W64
+  - C:/OSGeo4W64
 
 build:
   parallel: true
   project: PDAL.sln
-  verbosity: minimal
+  verbosity: detailed
+
+build_script:
+  - ps: pwd
+  - ps: ls
+  - C:/tools/ninja/ninja.exe
 
 notifications:
   - provider: Email
@@ -55,8 +101,7 @@ notifications:
     on_build_status_changed: true
 
 test_script:
-  - "SET PATH=%OSGEODIR%\\bin;%PATH%"
-  - echo %PATH%
+  - "SET PATH=%OSGEODIR%/bin;%PATH%"
   - ctest --output-on-failure -C Release -VV
 
 matrix:

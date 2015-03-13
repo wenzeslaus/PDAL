@@ -1,6 +1,13 @@
-@echo off
+@echo on
 
-cmake -G "Visual Studio 11 2012 Win64" ^
+"%VS110COMNTOOLS%..\..\VC\vcvarsall.bat" x86_amd64
+
+cmake -G "Ninja" ^
+    -DCMAKE_BUILD_TYPE=Release ^
+    -DCMAKE_SYSTEM_NAME=MSVC ^
+    -DCMAKE_MAKE_PROGRAM=C:\tools\ninja.exe ^
+    -DCMAKE_C_COMPILER="%VS110COMNTOOLS%..\..\VC\bin\x86_amd64\cl.exe" ^
+    -DCMAKE_CXX_COMPILER="%VS110COMNTOOLS%..\..\VC\bin\x86_amd64\cl.exe" ^
     -DBUILD_PLUGIN_ATTRIBUTE=%PDAL_OPTIONAL_COMPONENTS% ^
     -DBUILD_PLUGIN_CPD=OFF ^
     -DBUILD_PLUGIN_GREYHOUND=OFF ^
