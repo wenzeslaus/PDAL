@@ -57,7 +57,8 @@ notifications:
 test_script:
   - "SET PATH=%OSGEODIR%\\bin;%PATH%"
   - echo %PATH%
-  - ctest --output-on-failure -C Release -VV
+  - bin\pdal_bounds_test.exe
+  #- ctest --output-on-failure -C Release -VV
 
 matrix:
   fast_finish: true
