@@ -75,7 +75,7 @@ test_script:
 
 
 artifacts:
-  - path: C:/projects/pdal/bin/temp.txt
+  - path: pdal\bin\temp.txt
 
 matrix:
   fast_finish: true
