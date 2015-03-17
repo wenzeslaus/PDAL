@@ -70,12 +70,13 @@ test_script:
   - ps: pwd
   - ps: ls
   - depends.exe /c /ot:temp.txt /f:1 pdal_bounds_test.exe
+  - appveyor PushArtifact temp.txt
   #- pdal_bounds_test.exe
   #- ctest --output-on-failure -C Release -VV
 
 
-artifacts:
-  - path: pdal\bin\temp.txt
+#artifacts:
+#  - path: pdal\bin\temp.txt
 
 matrix:
   fast_finish: true
