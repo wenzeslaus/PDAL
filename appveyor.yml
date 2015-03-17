@@ -30,7 +30,7 @@ install:
   # get the OSGeo installer
   - ps: wget http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe -OutFile C:\temp\osgeo4w-setup.exe | out-null
   # and install our dependencies, shouldn't have to do some of these, but it seems they aren't brought in as dependencies
-  - C:\temp\osgeo4w-setup.exe -s http://download.osgeo.org/osgeo4w/ -a -q -P boost-devel,boost-libs,expat,freexl,hdf5,libjpeg,libjpeg12,libmysql,libpng,netcdf,ogdi,openjpeg,spatialite,sqlite3,xerces-c-vc10,gdal,geos,hexer,iconv,laszip,libgeotiff,libtiff,libpq,libxml2,nitro,pcl,points2grid,proj,python-numpy,zlib -R %OSGEODIR% > nul
+  - C:\temp\osgeo4w-setup.exe -s http://download.osgeo.org/osgeo4w/ -a -q -P boost-devel,boost-libs,expat,freexl,hdf5,libjpeg,libjpeg12,libmysql,libpng,netcdf,ogdi,openjpeg,spatialite,sqlite3,xerces-c-vc10,gdal,geos,hexer,iconv,laszip,libgeotiff,libtiff,libpq,libxml2,nitro,pcl,points2grid,proj,python-numpy,szip,zlib -R %OSGEODIR% > nul
   # call our PDAL install script
   - call .\\scripts\\appveyor\\install.cmd
 
@@ -71,7 +71,7 @@ test_script:
   - ps: ls
   - depends.exe /c /ot:temp.txt /f:1 pdal_bounds_test.exe
   - appveyor PushArtifact temp.txt
-  #- pdal_bounds_test.exe
+  - pdal_bounds_test.exe
   #- ctest --output-on-failure -C Release -VV
 
 
