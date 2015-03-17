@@ -57,6 +57,8 @@ notifications:
 test_script:
   - "SET PATH=%OSGEODIR%\\bin;%PATH%"
   - echo %PATH%
+  - echo Setup environment variables
+  - call "%VS110COMNTOOLS%../../VC/vcvarsall.bat" x86_amd64
   - cd %OSGEODIR%\\bin
   - ps: pwd
   - ps: ls
