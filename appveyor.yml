@@ -59,7 +59,7 @@ test_script:
   - cd C:/projects/pdal/test/unit
   - ps: pwd
   - ps: ls
-  - cd C:/projects/pdal/build/bin
+  - cd C:/projects/pdal/bin
   - ps: pwd
   - ps: ls
   - pdal_bounds_test
