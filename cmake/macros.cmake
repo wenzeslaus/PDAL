@@ -148,6 +148,7 @@ macro(PDAL_ADD_TEST _name)
     set_property(TARGET ${_name} PROPERTY FOLDER "Tests")
     target_link_libraries(${_name} ${PDAL_LIB_NAME} gtest gtest_main ${PDAL_ADD_TEST_LINK_WITH})
     add_test(NAME ${_name} COMMAND "${PROJECT_BINARY_DIR}/bin/${_name}" WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/..")
+    message(STATUS "Test ${_name} added in ${PROJECT_BINARY_DIR}/bin")
 endmacro(PDAL_ADD_TEST)
 
 ###############################################################################

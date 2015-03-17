@@ -15,6 +15,8 @@ foreach(infileName ${inFiles})
 endforeach()
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
+message(STATUS "A little debugging, the PROJECT_BINARY_DIR is ${PROJECT_BINARY_DIR}")
+
 include_directories(
     ${PROJECT_SOURCE_DIR}/include
     ${GDAL_INCLUDE_DIR}
