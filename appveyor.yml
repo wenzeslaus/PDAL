@@ -56,7 +56,14 @@ notifications:
 
 test_script:
   - "SET PATH=%OSGEODIR%\\bin;%PATH%"
+  - echo %PATH%
+  - cd %OSGEODIR%\\bin
+  - ps: pwd
+  - ps: ls
+  - ps: cp *.dll C:/projects/pdal/bin/.
   - cd C:/projects/pdal/bin
+  - ps: pwd
+  - ps: ls
   - pdal_bounds_test.exe
   #- ctest --output-on-failure -C Release -VV
 
