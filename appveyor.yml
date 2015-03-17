@@ -17,6 +17,9 @@ environment:
     - PDAL_OPTIONAL_COMPONENTS: ON
 
 install:
+  - cinst dependencywalker
+
+
   # make a temp directory for downloading osgeo4w-setup.exe
   # this may not matter as much if part of the install step, as pdal has
   # already been cloned, otherwise git would complain about a non-empty
@@ -66,8 +69,13 @@ test_script:
   - cd C:/projects/pdal/bin
   - ps: pwd
   - ps: ls
-  - pdal_bounds_test.exe
+  - depends.exe /c /ot:temp.txt /f:1 pdal_bounds_test.exe
+  #- pdal_bounds_test.exe
   #- ctest --output-on-failure -C Release -VV
+
+
+artifacts:
+  - path: C:/projects/pdal/bin/temp.txt
 
 matrix:
   fast_finish: true
