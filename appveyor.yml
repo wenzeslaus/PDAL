@@ -57,8 +57,6 @@ notifications:
 test_script:
   - "SET PATH=%OSGEODIR%\\bin;%PATH%"
   - cd C:/projects/pdal/bin
-  - ps: pwd
-  - ps: ls -al
   - pdal_bounds_test.exe
   #- ctest --output-on-failure -C Release -VV
 
