@@ -42,8 +42,8 @@ build:
   project: PDAL.sln
   verbosity: minimal
   
-after_build:
-  - msbuild RUN_TESTS
+#after_build:
+#  - msbuild RUN_TESTS
 
 notifications:
   - provider: Email
@@ -59,21 +59,21 @@ notifications:
     on_build_success: false
     on_build_status_changed: true
 
-#test_script:
-#  - "SET PATH=%OSGEODIR%\\bin;%PATH%"
+test_script:
+  - "SET PATH=%OSGEODIR%\\bin;%PATH%"
 #  - echo %PATH%
 #  - echo Setup environment variables
-#  - call "%VS110COMNTOOLS%../../VC/vcvarsall.bat" x86_amd64
-#  - cd %OSGEODIR%\\bin
+  - call "%VS110COMNTOOLS%../../VC/vcvarsall.bat" x86_amd64
+  - cd %OSGEODIR%\\bin
 #  - ps: pwd
 #  - ps: ls
-#  - ps: cp *.dll C:/projects/pdal/bin/.
-#  - cd C:/projects/pdal/bin
+  - ps: cp *.dll C:/projects/pdal/bin/.
+  - cd C:/projects/pdal/bin
 #  - ps: pwd
 #  - ps: ls
 #  - depends.exe /c /ot:temp.txt /f:1 pdal_bounds_test.exe
 #  - appveyor PushArtifact temp.txt
-#  - pdal_bounds_test.exe
+  - pdal_bounds_test.exe
 #  #- ctest --output-on-failure -C Release -VV
 
 matrix:
