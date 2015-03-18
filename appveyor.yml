@@ -41,6 +41,9 @@ build:
   parallel: true
   project: PDAL.sln
   verbosity: minimal
+  
+after_build:
+  - msbuild RUN_TESTS
 
 notifications:
   - provider: Email
