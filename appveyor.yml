@@ -19,24 +19,23 @@ environment:
 install:
   - cinst dependencywalker
 
-
   # make a temp directory for downloading osgeo4w-setup.exe
   # this may not matter as much if part of the install step, as pdal has
   # already been cloned, otherwise git would complain about a non-empty
   # directory
   - ps: mkdir C:\temp | out-null
+
   # make the osgeo directory
   - ps: mkdir %OSGEODIR% | out-null
+
   # get the OSGeo installer
   - ps: wget http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe -OutFile C:\temp\osgeo4w-setup.exe | out-null
+
   # and install our dependencies, shouldn't have to do some of these, but it seems they aren't brought in as dependencies
   - C:\temp\osgeo4w-setup.exe -s http://download.osgeo.org/osgeo4w/ -a -q -P boost-devel,boost-libs,expat,freexl,hdf5,libjpeg,libjpeg12,libmysql,libpng,netcdf,ogdi,openjpeg,spatialite,sqlite3,xerces-c-vc10,gdal,geos,hexer,iconv,laszip,libgeotiff,libtiff,libpq,libxml2,nitro,pcl,points2grid,proj,python-numpy,szip,zlib -R %OSGEODIR% > nul
+
   # call our PDAL install script
   - call .\\scripts\\appveyor\\install.cmd
-
-cache:
-  # this should cache our OSGeo4W install between jobs in the build matrix
-  - C:\OSGeo4W64
 
 build:
   parallel: true
@@ -57,26 +56,22 @@ notifications:
     on_build_success: false
     on_build_status_changed: true
 
-test_script:
-  - "SET PATH=%OSGEODIR%\\bin;%PATH%"
-  - echo %PATH%
-  - echo Setup environment variables
-  - call "%VS110COMNTOOLS%../../VC/vcvarsall.bat" x86_amd64
-  - cd %OSGEODIR%\\bin
-  - ps: pwd
-  - ps: ls
-  - ps: cp *.dll C:/projects/pdal/bin/.
-  - cd C:/projects/pdal/bin
-  - ps: pwd
-  - ps: ls
-  - depends.exe /c /ot:temp.txt /f:1 pdal_bounds_test.exe
-  - appveyor PushArtifact temp.txt
-  - pdal_bounds_test.exe
-  #- ctest --output-on-failure -C Release -VV
-
-
-#artifacts:
-#  - path: pdal\bin\temp.txt
+#test_script:
+#  - "SET PATH=%OSGEODIR%\\bin;%PATH%"
+#  - echo %PATH%
+#  - echo Setup environment variables
+#  - call "%VS110COMNTOOLS%../../VC/vcvarsall.bat" x86_amd64
+#  - cd %OSGEODIR%\\bin
+#  - ps: pwd
+#  - ps: ls
+#  - ps: cp *.dll C:/projects/pdal/bin/.
+#  - cd C:/projects/pdal/bin
+#  - ps: pwd
+#  - ps: ls
+#  - depends.exe /c /ot:temp.txt /f:1 pdal_bounds_test.exe
+#  - appveyor PushArtifact temp.txt
+#  - pdal_bounds_test.exe
+#  #- ctest --output-on-failure -C Release -VV
 
 matrix:
   fast_finish: true
