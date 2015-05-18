@@ -236,8 +236,13 @@ Stage *StageFactory::createStage(std::string const& stage_name,
 {
     PluginManager& pm = PluginManager::getInstance();
     Stage *s = static_cast<Stage*>(pm.createObject(stage_name));
+
     if (s && ownStage)
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
         m_ownedStages.push_back(std::unique_ptr<Stage>(s));
+    }
+
     return s;
 }
 

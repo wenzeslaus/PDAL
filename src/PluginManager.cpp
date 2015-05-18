@@ -111,6 +111,7 @@ bool PluginManager::registerObject(const std::string& objectType,
         if (pm.m_version.major == params->version.major)
         {
             auto entry(std::make_pair(objectType, *params));
+            auto lock(pm.acquireLock());
             registered = pm.m_exactMatchMap.insert(entry).second;
         }
     }
@@ -189,6 +190,8 @@ bool PluginManager::initializePlugin(PF_InitFunc initFunc)
     if (PF_ExitFunc exitFunc = initFunc())
     {
         initialized = true;
+
+        auto lock(pm.acquireLock());
         pm.m_exitFuncVec.push_back(exitFunc);
     }
 
@@ -216,6 +219,7 @@ bool PluginManager::shutdown()
 {
     bool success(true);
 
+    auto lock(acquireLock());
     for (auto const& func : m_exitFuncVec)
     {
         try
@@ -330,10 +334,16 @@ bool PluginManager::loadByPath(const std::string& pluginPath,
     boost::filesystem::path path(pluginPath);
     std::string pathname = Utils::tolower(path.filename().string());
 
+    bool found(false);
+
+    {
+        auto lock(acquireLock());
+        found = m_dynamicLibraryMap.count(path.string());
+    }
+
     // If we are a valid type, and we're not yet already
     // loaded in the LibraryMap, load it.
-    if (pluginTypeValid(pathname, type) &&
-        m_dynamicLibraryMap.find(path.string()) == m_dynamicLibraryMap.end())
+    if (pluginTypeValid(pathname, type) && !found)
     {
         std::string errorString;
         auto completePath(boost::filesystem::complete(path).string());
@@ -357,11 +367,13 @@ void *PluginManager::createObject(const std::string& objectType)
 
     auto find([this, &objectType]()->bool
     {
+        auto lock(acquireLock());
         return m_exactMatchMap.count(objectType);
     });
 
     if (find() || (guessLoadByPath(objectType) && find()))
     {
+        auto lock(acquireLock());
         obj = m_exactMatchMap[objectType].createFunc();
     }
 
@@ -372,21 +384,35 @@ void *PluginManager::createObject(const std::string& objectType)
 DynamicLibrary *PluginManager::loadLibrary(const std::string& path,
     std::string & errorString)
 {
-    DynamicLibrary *d = DynamicLibrary::load(path, errorString);
+    DynamicLibrary *d(0);
+    const auto fullPath(boost::filesystem::complete(path).string());
 
-    if (d)
+    auto lock(acquireLock());
+    if (!m_dynamicLibraryMap.count(fullPath))
     {
-        m_dynamicLibraryMap[boost::filesystem::complete(path).string()] =
-            DynLibPtr(d);
+        d = DynamicLibrary::load(path, errorString);
+
+        if (d)
+        {
+            m_dynamicLibraryMap[fullPath] = DynLibPtr(d);
+        }
     }
 
     return d;
 }
 
 
-const PluginManager::RegistrationMap& PluginManager::getRegistrationMap()
+PluginManager::RegistrationMap PluginManager::getRegistrationMap() const
 {
+    auto lock(acquireLock());
     return m_exactMatchMap;
 }
 
+
+std::unique_lock<std::mutex> PluginManager::acquireLock() const
+{
+    return std::unique_lock<std::mutex>(m_mutex);
+}
+
 } // namespace pdal
+

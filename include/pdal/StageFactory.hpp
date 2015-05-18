@@ -38,6 +38,7 @@
 #include <pdal/Stage.hpp>
 
 #include <map>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -87,6 +88,7 @@ private:
     StageFactory& operator=(const StageFactory&); // not implemented
     StageFactory(const StageFactory&); // not implemented
 
+    std::mutex m_mutex;
     std::vector<std::unique_ptr<Stage>> m_ownedStages;
 };
 

@@ -44,6 +44,7 @@
 
 #include <map>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -79,7 +80,7 @@ public:
 
     static bool registerObject(const std::string& objectType,
         const PF_RegisterParams* params);
-    const RegistrationMap& getRegistrationMap();
+    RegistrationMap getRegistrationMap() const;
 
 private:
     PluginManager();
@@ -89,6 +90,7 @@ private:
     bool shutdown();
     bool guessLoadByPath(const std::string & driverName);
     bool loadByPath(const std::string & path, PF_PluginType type);
+    std::unique_lock<std::mutex> acquireLock() const;
 
     DynamicLibrary *loadLibrary(const std::string& path,
         std::string& errorString);
@@ -96,8 +98,9 @@ private:
     PF_PluginAPI_Version m_version;
     DynamicLibraryMap m_dynamicLibraryMap;
     ExitFuncVec m_exitFuncVec;
-    RegistrationMap m_tempExactMatchMap;
     RegistrationMap m_exactMatchMap;
+
+    mutable std::mutex m_mutex;
 
     // Disable copy/assignment.
     PluginManager(const PluginManager&);
