@@ -232,7 +232,7 @@ StringList readSTDIN()
 }
 
 
-bool TIndexKernel::IsFileIndexed( const FieldIndexes& indexes,
+bool TIndexKernel::IsFileIndexed( const FieldIndex& indexes,
                     const FileInfo& fileInfo)
 {
     std::ostringstream qstring;
@@ -298,31 +298,36 @@ void TIndexKernel::createFile()
             throw pdal_error(out.str());
         }
 
-    FieldIndexes indexes = getFields();
-
+    std::vector<FileInfo> infos;
     KernelFactory factory(false);
 
     pdal::Pool pool(32);
 
     for (const auto& f : m_files)
     {
-        pool.add([this, &f, &factory, &indexes]()
+        pool.add([this, &f, &factory, &infos]()
         {
             //ABELL - Not sure why we need to get absolute path here.
             std::string absolute_f = FileUtils::toAbsolutePath(f);
             FileInfo info = getFileInfo(factory, absolute_f);
-            if (!IsFileIndexed(indexes, info))
-            {
-                if (createFeature(indexes, info))
-                    m_log.get(LogLevel::Info) << "Indexed file " << absolute_f << std::endl;
-                else
-                    m_log.get(LogLevel::Error) << "Failed to create feature for "
-                        "file '" << absolute_f << "'" << std::endl;
-
-            }
+            infos.push_back(info);
         });
     }
 
+    for (auto i = 0; i < infos.size(); i++)
+    {
+        FieldIndex index = getFields();
+
+        if (!IsFileIndexed(index, infos[i]))
+        {
+            if (createFeature(index, infos[i]))
+                m_log.get(LogLevel::Info) << "indexed file " << infos[0].m_filename << std::endl;
+            else
+                m_log.get(LogLevel::Error) << "failed to create feature for "
+                    "file '" << infos[0].m_filename << "'" << std::endl;
+
+        }
+    }
     OGR_DS_Destroy(m_dataset);
 }
 
@@ -345,7 +350,7 @@ void TIndexKernel::mergeFile()
         throw pdal_error(out.str());
     }
 
-    FieldIndexes indexes = getFields();
+    FieldIndex indexes = getFields();
 
     SpatialRef outSrs(m_tgtSrsString);
     if (!outSrs)
@@ -447,7 +452,7 @@ void TIndexKernel::mergeFile()
 }
 
 
-bool TIndexKernel::createFeature(const FieldIndexes& indexes,
+bool TIndexKernel::createFeature(const FieldIndex& indexes,
     const FileInfo& fileInfo)
 {
     OGRFeatureH hFeature = OGR_F_Create(OGR_L_GetLayerDefn(m_layer));
@@ -656,9 +661,9 @@ void TIndexKernel::createFields()
 }
 
 
-TIndexKernel::FieldIndexes TIndexKernel::getFields()
+TIndexKernel::FieldIndex TIndexKernel::getFields()
 {
-    FieldIndexes indexes;
+    FieldIndex indexes;
 
     void *fDefn = OGR_L_GetLayerDefn(m_layer);
 

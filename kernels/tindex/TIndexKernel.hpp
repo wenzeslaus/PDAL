@@ -60,13 +60,15 @@ class PDAL_DLL TIndexKernel : public Kernel
         struct tm m_mtime;
     };
 
-    struct FieldIndexes
+    struct FieldIndex
     {
         int m_filename;
         int m_srs;
         int m_ctime;
         int m_mtime;
     };
+
+    typedef std::vector<FieldIndex> FieldIndexes;
 
 public:
     static void * create();
@@ -86,15 +88,15 @@ private:
     bool createDataset(const std::string& filename);
     bool openLayer(const std::string& layerName);
     bool createLayer(const std::string& layerName);
-    FieldIndexes getFields();
+    FieldIndex getFields();
     FileInfo getFileInfo(KernelFactory& factory, const std::string& filename);
-    bool createFeature(const FieldIndexes& indexes, const FileInfo& info);
+    bool createFeature(const FieldIndex& indexes, const FileInfo& info);
     gdal::Geometry prepareGeometry(const FileInfo& fileInfo);
     gdal::Geometry prepareGeometry(const std::string& wkt,
         const gdal::SpatialRef& inSrs, const gdal::SpatialRef& outSrs);
     void createFields();
 
-    bool IsFileIndexed( const FieldIndexes& indexes,
+    bool IsFileIndexed( const FieldIndex& indexes,
                         const FileInfo& fileInfo);
 
     std::string m_idxFilename;
