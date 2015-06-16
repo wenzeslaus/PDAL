@@ -117,7 +117,7 @@ void InfoKernel::addSwitches()
     processing_options->add_options()
         ("all",
          po::value<bool>(&m_showAll)->zero_tokens()->implicit_value(true),
-         "dump the schema")
+         "dump all information")
         ("point,p", po::value<std::string >(&m_pointIndexes), "point to dump")
         ("query", po::value< std::string>(&m_QueryPoint),
          "A 2d or 3d point query point")
@@ -272,8 +272,9 @@ void InfoKernel::prepare(const std::string& filename)
     if (m_showMetadata)
         readerOptions.add("count", 0);
 
+    bool noPlugins(m_showSummary);
     m_manager = std::unique_ptr<PipelineManager>(
-        KernelSupport::makePipeline(filename));
+        KernelSupport::makePipeline(filename, noPlugins));
     m_reader = m_manager->getStage();
     Stage *stage = m_reader;
 
@@ -307,11 +308,12 @@ MetadataNode InfoKernel::dump(const std::string& filename)
     root.add("filename", filename);
 
     bool bPrepared(false);
-    if (m_showSummary || m_showAll)
+    if (m_showSummary && ! m_showAll)
     {
         QuickInfo qi = m_reader->preview();
         MetadataNode summary = dumpSummary(qi).clone("summary");
         root.add(summary);
+        return root;
     }
     if (m_showSchema || m_showAll)
     {

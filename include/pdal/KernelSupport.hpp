@@ -68,7 +68,7 @@ class PDAL_DLL KernelSupport
 public:
     // makes a writer, from just the filename and some other
     // options (and the input stage)
-    static PipelineManager* makePipeline(const std::string& filename);
+    static PipelineManager* makePipeline(const std::string& filename, bool noPlugins=false);
 
 private:
     KernelSupport& operator=(const KernelSupport&); // not implemented
