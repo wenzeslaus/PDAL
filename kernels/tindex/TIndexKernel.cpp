@@ -46,6 +46,7 @@
 #include <pdal/GlobalEnvironment.hpp>
 #include <pdal/KernelFactory.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/util/Pool.hpp>
 #include <merge/MergeFilter.hpp>
 #include <pdal/PDALUtils.hpp>
 
@@ -300,21 +301,28 @@ void TIndexKernel::createFile()
     FieldIndexes indexes = getFields();
 
     KernelFactory factory(false);
-    for (auto f : m_files)
-    {
-        //ABELL - Not sure why we need to get absolute path here.
-        f = FileUtils::toAbsolutePath(f);
-        FileInfo info = getFileInfo(factory, f);
-        if (!IsFileIndexed(indexes, info))
-        {
-            if (createFeature(indexes, info))
-                m_log.get(LogLevel::Info) << "Indexed file " << f << std::endl;
-            else
-                m_log.get(LogLevel::Error) << "Failed to create feature for "
-                    "file '" << f << "'" << std::endl;
 
-        }
+    pdal::Pool pool(32);
+
+    for (const auto& f : m_files)
+    {
+        pool.add([this, &f, &factory, &indexes]()
+        {
+            //ABELL - Not sure why we need to get absolute path here.
+            std::string absolute_f = FileUtils::toAbsolutePath(f);
+            FileInfo info = getFileInfo(factory, absolute_f);
+            if (!IsFileIndexed(indexes, info))
+            {
+                if (createFeature(indexes, info))
+                    m_log.get(LogLevel::Info) << "Indexed file " << absolute_f << std::endl;
+                else
+                    m_log.get(LogLevel::Error) << "Failed to create feature for "
+                        "file '" << absolute_f << "'" << std::endl;
+
+            }
+        });
     }
+
     OGR_DS_Destroy(m_dataset);
 }
 
@@ -529,7 +537,7 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
 
     fileInfo.m_filename = filename;
     if (!m_fastBoundary)
-        fileInfo.m_boundary = metadata.findChild("boundary:boundary").value();
+        fileInfo.m_boundary = metadata.findChild("boundarpdaly:boundary").value();
     else
     {
         auto findNode = [](MetadataNode m,
