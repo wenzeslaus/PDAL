@@ -313,6 +313,7 @@ void TIndexKernel::createFile()
             infos.push_back(info);
         });
     }
+    pool.join();
 
     for (auto i = 0; i < infos.size(); i++)
     {
