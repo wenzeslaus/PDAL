@@ -49,10 +49,29 @@
 #include <memory>
 #include <vector>
 
+#include <csignal>
+#include <execinfo.h>
+#include <cstdio>
+#include <unistd.h>
+
+
 #include <boost/tokenizer.hpp>
 typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
 
 namespace po = boost::program_options;
+
+namespace
+{
+    void stack_trace_handler(int sig)
+    {
+        void* array[16];
+        const std::size_t size(backtrace(array, 16));
+
+        std::cerr << "PDAL stacktrace error " << sig << std::endl;
+        backtrace_symbols_fd(array, size, STDERR_FILENO);
+        exit(1);
+    }
+}
 
 namespace pdal
 {
@@ -130,6 +149,11 @@ int Kernel::do_startup()
 int Kernel::do_execution()
 {
 
+    if (!m_hardCoreDebug)
+    {
+        // catch stack trace
+        signal(SIGSEGV, stack_trace_handler);
+    }
     if (m_reportDebug)
     {
         std::cout << getPDALDebugInformation() << std::endl;
