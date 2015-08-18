@@ -131,7 +131,7 @@ between two sources.
 ::
 
     $ pdal diff <source> <candidate>
-    
+
 ::
 
     --source arg     Non-positional option for specifying filename of source file.
@@ -326,6 +326,45 @@ Example 2:
             "Z": 446.38999999999999
           },
           ...
+
+
+.. _omni_command:
+
+omni command
+------------------------------------------------------------------------------
+
+The *omni* command is used for constructing pipelines directly from the
+command-line.
+
+::
+
+    $ pdal omni <input> <output>
+
+::
+
+    -i [ --input ] arg    input file name
+    -o [ --output ] arg   output file name
+    -r [ --reader ] arg   reader type
+    -f [ --filter ] arg   filter type
+    -w [ --writer ] arg   writer type
+
+The `input` and `output` options are required. If no `reader` type is given for
+the input file name, PDAL will attempt to infer the correct driver from the
+extension. The same is true for the `writer` type and the output file name.
+
+`filter` is not required, but will accept multiple arguments if provided, thus
+constructing a multi-stage filtering operation.
+
+Given these tools, we can now construct a custom pipeline on-the-fly. The
+example below uses a simple LAS reader and writer, but stages a PCL-based
+voxel grid filter followed by the PCL-based ground filter. We can even set
+stage-specific parameters as shown.
+
+::
+
+    $ pdal omni input.las output.las --filter filters.pclblock filters.ground \
+    --filters.pclblock.json="{\"pipeline\":{\"filters\":[{\"name\":\"VoxelGrid\"}]}}" \
+    --filters.ground.approximate=true --filters.ground.extract=true
 
 
 .. _pcl_command:

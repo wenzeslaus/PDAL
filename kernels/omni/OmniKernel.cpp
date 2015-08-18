@@ -1,6 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
-* Copyright (c) 2014-2015, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2015, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -51,10 +50,14 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
-                                     "kernels.omni",
-                                     "Omni Kernel",
-                                     "http://pdal.io/kernels/kernels.omni.html");
+static PluginInfo const s_info =
+    PluginInfo("kernels.omni",
+               "The Omni kernel allows users to construct a pipeline " \
+               "consisting of a reader, a writer, and N filter stages. " \
+               "Any supported stage type can be specified from the command " \
+               "line, reducing the need to create custom kernels for every " \
+               "combination.",
+               "http://pdal.io/kernels/kernels.omni.html");
 
 CREATE_STATIC_PLUGIN(1, 0, OmniKernel, Kernel, s_info)
 
@@ -67,25 +70,17 @@ OmniKernel::OmniKernel()
     : Kernel()
     , m_inputFile("")
     , m_outputFile("")
-    , m_filterType("")
+    , m_readerType("")
+    , m_writerType("")
 {}
 
 void OmniKernel::validateSwitches()
 {
     if (m_inputFile == "")
-    {
         throw app_usage_error("--input/-i required");
-    }
 
     if (m_outputFile == "")
-    {
         throw app_usage_error("--output/-o required");
-    }
-
-    if (m_filterType == "")
-    {
-        throw app_usage_error("--filter/-f required");
-    }
 }
 
 void OmniKernel::addSwitches()
@@ -98,62 +93,102 @@ void OmniKernel::addSwitches()
      "input file name")
     ("output,o", po::value<std::string>(&m_outputFile)->default_value(""),
      "output file name")
-    ("filter,f", po::value<std::string>(&m_filterType)->default_value(""),
+    ("reader,r", po::value<std::string>(&m_readerType)->default_value(""),
+     "reader type")
+    ("filter,f",
+     po::value<std::vector<std::string> >(&m_filterType)->multitoken(),
      "filter type")
+    ("writer,w", po::value<std::string>(&m_writerType)->default_value(""),
+     "writer type")
     ;
 
     addSwitchSet(file_options);
 
     addPositionalSwitch("input", 1);
     addPositionalSwitch("output", 1);
-    addPositionalSwitch("filter", 1);
 }
 
 int OmniKernel::execute()
 {
-    PointTable table;
-
-    Options readerOptions;
-    readerOptions.add<std::string>("filename", m_inputFile);
+    // setting common options for each stage propagates the debug flag and
+    // verbosity level
+    Options readerOptions, filterOptions, writerOptions;
     setCommonOptions(readerOptions);
-
-    Stage& readerStage(Kernel::makeReader(m_inputFile));
-    readerStage.setOptions(readerOptions);
-
-    Options filterOptions;
-    filterOptions.add<bool>("debug", isDebug());
-    filterOptions.add<uint32_t>("verbose", getVerboseLevel());
-
-    StageFactory f;
-    std::unique_ptr<Stage> filterStage(f.createStage(m_filterType));
-    filterStage->setOptions(filterOptions);
-    filterStage->setInput(readerStage);
-
-    // setup the Writer and write the results
-    Options writerOptions;
-    writerOptions.add<std::string>("filename", m_outputFile);
+    setCommonOptions(filterOptions);
     setCommonOptions(writerOptions);
 
-    Stage& writer(Kernel::makeWriter(m_outputFile, *filterStage));
-    writer.setOptions(writerOptions);
+    m_manager = std::unique_ptr<PipelineManager>(new PipelineManager);
 
-    std::vector<std::string> cmd = getProgressShellCommand();
-    UserCallback *callback =
-        cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
-        (UserCallback *)new HeartbeatCallback();
+    if (!m_readerType.empty())
+    {
+        m_manager->addReader(m_readerType);
+    }
+    else
+    {
+        StageFactory factory;
+        std::string driver = factory.inferReaderDriver(m_inputFile);
 
-    writer.setUserCallback(callback);
+        if (driver.empty())
+            throw app_runtime_error("Cannot determine input file type of " +
+                                    m_inputFile);
+        m_manager->addReader(driver);
+    }
 
-    applyExtraStageOptionsRecursive(&writer);
-    writer.prepare(table);
+    if (m_manager == NULL)
+        throw pdal_error("Error making pipeline\n");
 
-    // process the data, grabbing the PointViewSet for visualization of the
-    // resulting PointView
-    PointViewSet viewSetOut = writer.execute(table);
+    Stage* reader = m_manager->getStage();
 
-    if (isVisualize())
-        visualize(*viewSetOut.begin());
-    //visualize(*viewSetIn.begin(), *viewSetOut.begin());
+    if (reader == NULL)
+        throw pdal_error("Error getting reader\n");
+
+    readerOptions.add("filename", m_inputFile);
+    reader->setOptions(readerOptions);
+
+    Stage* stage = reader;
+
+    // add each filter provided on the command-line, updating the stage pointer
+    for (auto const f : m_filterType)
+    {
+        Stage* filter = &(m_manager->addFilter(f));
+
+        if (filter == NULL)
+            throw pdal_error("Error getting filter\n");
+
+        filter->setOptions(filterOptions);
+        filter->setInput(*stage);
+        stage = filter;
+    }
+
+    if (!m_writerType.empty())
+    {
+        m_manager->addWriter(m_writerType);
+    }
+    else
+    {
+        StageFactory factory;
+        std::string driver = factory.inferWriterDriver(m_outputFile);
+
+        if (driver.empty())
+            throw app_runtime_error("Cannot determine output file type of " +
+                                    m_outputFile);
+        m_manager->addWriter(driver);
+    }
+
+    Stage* writer = m_manager->getStage();
+
+    if (writer == NULL)
+        throw pdal_error("Error getting writer\n");
+
+    writerOptions.add("filename", m_outputFile);
+    writer->setOptions(writerOptions);
+    writer->setInput(*stage);
+
+    // be sure to recurse through any extra stage options provided by the user
+    applyExtraStageOptionsRecursive(writer);
+
+    m_manager->prepare();
+    m_manager->execute();
 
     return 0;
 }

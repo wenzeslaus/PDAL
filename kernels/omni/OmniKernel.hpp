@@ -35,19 +35,18 @@
 #pragma once
 
 #include <pdal/Kernel.hpp>
+#include <pdal/PipelineManager.hpp>
 #include <pdal/pdal_export.hpp>
 
 #include <memory>
 #include <string>
+#include <vector>
 
 extern "C" int32_t OmniKernel_ExitFunc();
 extern "C" PF_ExitFunc OmniKernel_InitPlugin();
 
 namespace pdal
 {
-
-class Options;
-class Stage;
 
 class PDAL_DLL OmniKernel : public Kernel
 {
@@ -62,11 +61,13 @@ private:
     void addSwitches();
     void validateSwitches();
 
-    std::shared_ptr<Stage> makeReader(Options readerOptions);
-
     std::string m_inputFile;
     std::string m_outputFile;
-    std::string m_filterType;
+    std::string m_readerType;
+    std::vector<std::string> m_filterType;
+    std::string m_writerType;
+
+    std::unique_ptr<PipelineManager> m_manager;
 };
 
 } // namespace pdal
