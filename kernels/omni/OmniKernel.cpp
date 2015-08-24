@@ -38,6 +38,7 @@
 #include <pdal/KernelSupport.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/PipelineWriter.hpp>
 #include <pdal/PointTable.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/Stage.hpp>
@@ -70,6 +71,7 @@ OmniKernel::OmniKernel()
     : Kernel()
     , m_inputFile("")
     , m_outputFile("")
+    , m_pipelineOutput("")
     , m_readerType("")
     , m_writerType("")
 {}
@@ -93,6 +95,8 @@ void OmniKernel::addSwitches()
      "input file name")
     ("output,o", po::value<std::string>(&m_outputFile)->default_value(""),
      "output file name")
+    ("pipeline,p", po::value<std::string>(&m_pipelineOutput)->default_value(""),
+     "pipeline output")
     ("reader,r", po::value<std::string>(&m_readerType)->default_value(""),
      "reader type")
     ("filter,f",
@@ -187,8 +191,13 @@ int OmniKernel::execute()
     // be sure to recurse through any extra stage options provided by the user
     applyExtraStageOptionsRecursive(writer);
 
-    m_manager->prepare();
     m_manager->execute();
+
+    if (m_pipelineOutput.size() > 0)
+    {
+        PipelineWriter writer(*m_manager);
+        writer.writePipeline(m_pipelineOutput);
+    }
 
     return 0;
 }
