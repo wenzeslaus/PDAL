@@ -41,7 +41,6 @@
 #include <diff/DiffKernel.hpp>
 #include <info/InfoKernel.hpp>
 #include <merge/MergeKernel.hpp>
-#include <omni/OmniKernel.hpp>
 #include <pipeline/PipelineKernel.hpp>
 #include <random/RandomKernel.hpp>
 #include <sort/SortKernel.hpp>
@@ -69,7 +68,6 @@ KernelFactory::KernelFactory(bool no_plugins)
     PluginManager::initializePlugin(DiffKernel_InitPlugin);
     PluginManager::initializePlugin(InfoKernel_InitPlugin);
     PluginManager::initializePlugin(MergeKernel_InitPlugin);
-    PluginManager::initializePlugin(OmniKernel_InitPlugin);
     PluginManager::initializePlugin(PipelineKernel_InitPlugin);
     PluginManager::initializePlugin(RandomKernel_InitPlugin);
     PluginManager::initializePlugin(SortKernel_InitPlugin);
