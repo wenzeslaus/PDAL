@@ -89,6 +89,7 @@ include_dirs.append('../include')
 include_dirs.append('/usr/include/libxml2/')
 library_dirs.append('../lib')
 libraries.append('pdalcpp')
+libraries.append('pdal_plang')
 
 sources=['libpdalpython/libpdalpython'+ext,"libpdalpython/Pipeline.cpp",  ]
 

@@ -2,7 +2,7 @@
 # Python plugin CMake configuration
 #
 
-set(PLANG_LIB_NAME plang)
+set(PLANG_LIB_NAME pdal_plang)
 
 include(${PDAL_CMAKE_DIR}/python.cmake)
 
