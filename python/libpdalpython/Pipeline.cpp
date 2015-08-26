@@ -3,6 +3,7 @@
 #include <pdal/XMLSchema.hpp>
 #endif
 
+#include <Environment.hpp>
 
 namespace libpdalpython
 {

@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
+
 #include "Redirector.hpp"
 
 namespace pdal

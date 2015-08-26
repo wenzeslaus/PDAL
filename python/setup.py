@@ -86,6 +86,7 @@ from setuptools.extension import Extension as DistutilsExtension
 
 include_dirs.append(numpy.get_include())
 include_dirs.append('../include')
+include_dirs.append('../plugins/python/plang/')
 include_dirs.append('/usr/include/libxml2/')
 library_dirs.append('../lib')
 libraries.append('pdalcpp')
