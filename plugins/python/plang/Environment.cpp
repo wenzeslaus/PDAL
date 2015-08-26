@@ -59,11 +59,20 @@ namespace pdal
 namespace plang
 {
 
-static Environment g_environment;
+static Environment* g_environment = 0;
 
 EnvironmentPtr Environment::get()
 {
-    return &g_environment;
+    static std::once_flag flag;
+
+    auto init = []()
+    {
+        g_environment = new Environment();
+    };
+
+    std::call_once(flag, init);
+
+    return g_environment;
 }
 
 
@@ -76,6 +85,7 @@ Environment::Environment()
     // the return.
     auto initNumpy = []()
     {
+        std::cout << "init of numpyp!!!" << std::endl;
 #undef NUMPY_IMPORT_ARRAY_RETVAL
 #define NUMPY_IMPORT_ARRAY_RETVAL
         import_array();
