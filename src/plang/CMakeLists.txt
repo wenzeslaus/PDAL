@@ -15,9 +15,9 @@ set(plang_headers
     "${PDAL_HEADERS_DIR}/plang/Script.hpp"
 )
 
-set(PYTHON_LIBRARY ${PDAL_NO_AS_NEEDED_START}
-    ${PYTHON_LIBRARY}
-    ${PDAL_NO_AS_NEEDED_END})
+#set(PYTHON_LIBRARY ${PDAL_NO_AS_NEEDED_START}
+#    ${PYTHON_LIBRARY}
+#    ${PDAL_NO_AS_NEEDED_END})
 
 include(${PDAL_CMAKE_DIR}/python.cmake)
 
