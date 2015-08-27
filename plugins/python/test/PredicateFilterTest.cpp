@@ -41,7 +41,7 @@
 #include <stats/StatsFilter.hpp>
 #include <faux/FauxReader.hpp>
 
-#include "../plang/Environment.hpp"
+#include <pdal/plang/Environment.hpp>
 
 #include "Support.hpp"
 

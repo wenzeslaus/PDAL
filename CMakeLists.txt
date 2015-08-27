@@ -39,6 +39,7 @@ SET(PDAL_LIB_SOVERSION "0.0.0")
 # Name of C++ library
 set(PDAL_LIB_NAME pdalcpp)
 set(PDAL_UTIL_LIB_NAME pdal_util)
+set(PLANG_LIB_NAME pdal_plang)
 
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 
@@ -247,6 +248,9 @@ add_subdirectory(filters)
 add_subdirectory(kernels)
 add_subdirectory(src)
 add_subdirectory(tools)
+if (BUILD_PLUGIN_PYTHON)
+    add_subdirectory(src/plang)
+endif()
 
 if(WITH_TESTS)
   # This is fixed in trunk

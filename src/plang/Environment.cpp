@@ -32,7 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "Environment.hpp"
+#include <pdal/plang/Environment.hpp>
+#include <pdal/plang/Redirector.hpp>
 #define PY_ARRAY_UNIQUE_SYMBOL PDAL_ARRAY_API
 #include <numpy/arrayobject.h>
 
@@ -48,7 +49,6 @@
 #undef tolower
 #undef isspace
 
-#include "Redirector.hpp"
 
 // http://www.linuxjournal.com/article/3641
 // http://www.codeproject.com/Articles/11805/Embedding-Python-in-C-C-Part-I

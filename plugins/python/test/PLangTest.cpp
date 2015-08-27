@@ -34,7 +34,7 @@
 
 #include <pdal/pdal_test_main.hpp>
 
-#include "../plang/Invocation.hpp"
+#include <pdal/plang/Invocation.hpp>
 
 #include <Support.hpp>
 #include <faux/FauxReader.hpp>

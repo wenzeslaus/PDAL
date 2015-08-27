@@ -2,9 +2,9 @@
 # Python plugin CMake configuration
 #
 
-set(PLANG_LIB_NAME pdal_plang)
-
-include(${PDAL_CMAKE_DIR}/python.cmake)
-
-add_subdirectory(plang)
 add_subdirectory(filters)
+if (WITH_TESTS)
+    include(${PDAL_CMAKE_DIR}/python.cmake)
+    PDAL_ADD_TEST(plangtest FILES ./test/PLangTest.cpp
+        LINK_WITH pdal_plang)
+endif()

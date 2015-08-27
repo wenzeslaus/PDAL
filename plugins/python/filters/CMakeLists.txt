@@ -1,6 +1,7 @@
 
 # Predicate Filter
 #
+include(${PDAL_CMAKE_DIR}/python.cmake)
 set(srcs PredicateFilter.cpp)
 set(incs PredicateFilter.hpp)
 

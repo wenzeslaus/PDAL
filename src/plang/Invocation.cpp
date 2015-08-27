@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "Invocation.hpp"
-#include "Environment.hpp"
+#include <pdal/plang/Invocation.hpp>
+#include <pdal/plang/Environment.hpp>
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127) // conditional expression is constant
