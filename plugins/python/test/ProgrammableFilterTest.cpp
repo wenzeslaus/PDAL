@@ -43,8 +43,18 @@
 #include "Support.hpp"
 
 using namespace pdal;
+#include <pdal/plang/Environment.hpp>
 
-TEST(ProgrammableFilterTest, ProgrammableFilterTest_test1)
+class ProgrammableFilterTest : public ::testing::Test
+{
+public:
+    virtual void SetUp()
+    {
+        pdal::plang::Environment::get();
+    }
+
+};
+TEST_F(ProgrammableFilterTest, ProgrammableFilterTest_test1)
 {
     StageFactory f;
 
@@ -108,7 +118,7 @@ TEST(ProgrammableFilterTest, ProgrammableFilterTest_test1)
     EXPECT_FLOAT_EQ(statsZ.maximum(), 3.14);
 }
 
-TEST(ProgrammableFilterTest, pipeline)
+TEST_F(ProgrammableFilterTest, pipeline)
 {
     PipelineManager manager;
     PipelineReader reader(manager);
@@ -127,7 +137,7 @@ TEST(ProgrammableFilterTest, pipeline)
 }
 
 
-TEST(ProgrammableFilterTest, add_dimension)
+TEST_F(ProgrammableFilterTest, add_dimension)
 {
     StageFactory f;
 
