@@ -20,6 +20,8 @@ set(plang_headers
 #    ${PDAL_NO_AS_NEEDED_END})
 
 include(${PDAL_CMAKE_DIR}/python.cmake)
+include_directories(SYSTEM ${PYTHON_INCLUDE_DIR})
+
 
 PDAL_ADD_LIBRARY(${PLANG_LIB_NAME} ${plang_srcs} )
 target_link_libraries(${PLANG_LIB_NAME} ${PDAL_LIB_NAME} ${PYTHON_LIBRARY})

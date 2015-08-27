@@ -2,6 +2,8 @@
 # Predicate Filter
 #
 include(${PDAL_CMAKE_DIR}/python.cmake)
+include_directories(SYSTEM ${PYTHON_INCLUDE_DIR})
+
 set(srcs PredicateFilter.cpp)
 set(incs PredicateFilter.hpp)
 
