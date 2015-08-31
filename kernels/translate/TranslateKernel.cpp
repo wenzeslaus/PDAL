@@ -111,6 +111,7 @@ void TranslateKernel::addSwitches()
 
     addPositionalSwitch("input", 1);
     addPositionalSwitch("output", 1);
+    addPositionalSwitch("filter", -1);
 }
 
 int TranslateKernel::execute()
