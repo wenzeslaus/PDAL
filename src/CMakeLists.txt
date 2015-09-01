@@ -154,17 +154,17 @@ if(WIN32)
     endif()
 endif()
 
-PDAL_ADD_LIBRARY(${PDAL_LIB_NAME} ${PDAL_SOURCES})
+PDAL_ADD_LIBRARY(${PDAL_BASE_LIB_NAME} ${PDAL_SOURCES})
 
 if (WITH_LASZIP)
-    target_link_libraries(${PDAL_LIB_NAME} ${LASZIP_LIBRARY})
+    target_link_libraries(${PDAL_BASE_LIB_NAME} ${LASZIP_LIBRARY})
 endif()
 
 if (PDAL_HAVE_LIBXML2)
-    target_link_libraries(${PDAL_LIB_NAME} ${LIBXML2_LIBRARIES})
+    target_link_libraries(${PDAL_BASE_LIB_NAME} ${LIBXML2_LIBRARIES})
 endif()
 
-target_link_libraries(${PDAL_LIB_NAME}
+target_link_libraries(${PDAL_BASE_LIB_NAME}
     ${CMAKE_THREAD_LIBS_INIT}
     ${GDAL_LIBRARY}
     ${GEOS_LIBRARY}
@@ -173,17 +173,21 @@ target_link_libraries(${PDAL_LIB_NAME}
 )
 
 if (WITH_GEOTIFF)
-    target_link_libraries(${PDAL_LIB_NAME} ${GEOTIFF_LIBRARY})
+    target_link_libraries(${PDAL_BASE_LIB_NAME} ${GEOTIFF_LIBRARY})
 endif()
 
-target_link_libraries(${PDAL_LIB_NAME} ${Boost_LIBRARIES})
+target_link_libraries(${PDAL_BASE_LIB_NAME} ${Boost_LIBRARIES})
 
 if(WIN32)
-    target_link_libraries(${PDAL_LIB_NAME} ws2_32)
+    target_link_libraries(${PDAL_BASE_LIB_NAME} ws2_32)
 endif()
 
 ###############################################################################
 # Targets installation
+
+set(LIBNAME ${CMAKE_SHARED_LIBRARY_PREFIX}${PDAL_LIB_NAME})
+install(FILES ${LIBNAME} DESTINATION ${PDAL_LIB_INSTALL_DIR}
+    RENAME ${LIBNAME}${CMAKE_SHARED_LIBRARY_SUFFIX})
 
 install(DIRECTORY "${PDAL_HEADERS_DIR}/"
   DESTINATION "${PDAL_INCLUDE_INSTALL_DIR}"

@@ -37,7 +37,9 @@ SET_INSTALL_DIRS()
 SET(PDAL_LIB_SOVERSION "0.0.0")
 
 # Name of C++ library
+
 set(PDAL_LIB_NAME pdalcpp)
+set(PDAL_BASE_LIB_NAME pdal_base)
 set(PDAL_UTIL_LIB_NAME pdal_util)
 
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
@@ -332,7 +334,8 @@ include(CPack)
 
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
-export(TARGETS pdalcpp pdal_util FILE "${PDAL_BINARY_DIR}/PDALTargets.cmake")
+export(TARGETS ${PDAL_BASE_LIB_NAME} ${PDAL_UTIL_LIB_NAME}
+    FILE "${PDAL_BINARY_DIR}/PDALTargets.cmake")
 install(EXPORT PDALTargets DESTINATION lib/pdal/cmake)
 include(${PDAL_CMAKE_DIR}/config.cmake)
 
