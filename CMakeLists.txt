@@ -38,9 +38,24 @@ SET(PDAL_LIB_SOVERSION "0.0.0")
 
 # Name of C++ library
 
-set(PDAL_LIB_NAME pdalcpp)
-set(PDAL_BASE_LIB_NAME pdal_base)
-set(PDAL_UTIL_LIB_NAME pdal_util)
+#
+# To facilitate one-library linking, we do special things for various platforms.
+#
+# On Linux we install a linker script that we call libpdalcpp.so and it
+# in turn links libpdal_base.so and libpdal_util.so
+#
+# On OSX we reexport the symbols from libpdal_util.dylib into libpdalcpp.dylib
+# See src/CMakeLists.txt for the rest of the magic.
+#
+if (APPLE OR WINDOWS)
+    set(PDAL_LIB_NAME pdalcpp)
+    set(PDAL_BASE_LIB_NAME pdalcpp)
+    set(PDAL_UTIL_LIB_NAME pdal_util)
+else()
+    set(PDAL_LIB_NAME pdalcpp)
+    set(PDAL_BASE_LIB_NAME pdal_base)
+    set(PDAL_UTIL_LIB_NAME pdal_util)
+endif()
 
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 
